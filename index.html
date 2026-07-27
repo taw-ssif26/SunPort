@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabid Uddin Nahian • Cosmic Laboratory Portfolio</title>
+    
+    <!-- Google Fonts: Syncopate (Wide Futuristic) & Space Grotesk (Scientific Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        wide: ['Syncopate', 'sans-serif'],
+                        space: ['Space Grotesk', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        cosmicBg: '#040608',
+                        primaryCyan: '#00E5FF',
+                        secondaryTeal: '#14B8A6',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrolling Track */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #040608;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 229, 255, 0.25);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 229, 255, 0.7);
+        }
+
+        /* Glass HUD Component Framework */
+        .glass-hud {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .glass-hud::before, .glass-hud::after {
+            content: '';
+            position: absolute;
+            width: 8px; height: 8px;
+            border-color: rgba(0, 229, 255, 0.3);
+            border-style: solid;
+            pointer-events: none;
+        }
+        .glass-hud::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+        .glass-hud::after { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+
+        /* Mouse tracking light spotlight on cards */
+        .glass-hud-inner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(350px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 229, 255, 0.06), transparent 80%);
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .glass-hud:hover .glass-hud-inner::before {
+            opacity: 1;
+        }
+
+        /* Scanline Overlay styling */
+        .scanline-mask {
+            position: relative;
+            overflow: visible;
+        }
+        .scanline-mask::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 229, 255, 0.01) 50%);
+            background-size: 100% 4px;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        /* 3D Rotational Orbit Structures */
+        @keyframes orbitCW {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes orbitCCW {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        .orbit-cw { animation: orbitCW 20s linear infinite; }
+        .orbit-ccw { animation: orbitCCW 15s linear infinite; }
+
+        /* Parallax starry vector landscape */
+        .stars-bg {
+            background-image: radial-gradient(circle at center, rgba(4, 10, 24, 0.4) 0%, #040608 100%);
+        }
+
+        /* Particle typography build transition */
+        .particle-build {
+            animation: particleBuild 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes particleBuild {
+            0% {
+                filter: blur(15px) letter-spacing(0.2em);
+                opacity: 0;
+            }
+            100% {
+                filter: blur(0) letter-spacing(normal);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-cosmicBg text-white overflow-x-hidden font-space scanline-mask stars-bg">
+
+    <!-- CINEMATIC LOADING SCREEN (Physic Symbol Morph) -->
+    <div id="loading-screen" class="fixed inset-0 z-50 bg-[#040608] flex flex-col items-center justify-center transition-opacity duration-1000">
+        <div class="relative w-56 h-56 flex items-center justify-center">
+            <!-- Central Active Nucleus -->
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primaryCyan to-secondaryTeal flex items-center justify-center shadow-[0_0_30px_#00E5FF]">
+                <span class="text-xs font-mono text-cosmicBg font-bold">Ψ</span>
+            </div>
+            <!-- Orbiting Electron Shells -->
+            <div class="absolute w-40 h-40 border border-white/5 rounded-full orbit-cw">
+                <div class="w-2.5 h-2.5 rounded-full bg-primaryCyan absolute top-0 left-1/2 -translate-x-1/2 shadow-[0_0_12px_#00E5FF]"></div>
+            </div>
+            <div class="absolute w-48 h-48 border border-white/5 rounded-full orbit-ccw">
+                <div class="w-2 h-2 rounded-full bg-secondaryTeal absolute bottom-0 left-1/3 shadow-[0_0_8px_#14B8A6]"></div>
+            </div>
+            
+            <!-- Real-Time Loader Diagnostics -->
+            <div class="absolute -bottom-16 w-72 text-center space-y-2">
+                <span class="text-[9px] font-wide text-white/30 tracking-[0.25em] block uppercase">Calibrating Vector Field Matrix</span>
+                <div class="w-full h-[1px] bg-white/5 relative overflow-hidden">
+                    <div id="loader-bar" class="absolute top-0 left-0 h-full bg-primaryCyan transition-all duration-100" style="width: 0%"></div>
+                </div>
+                <span id="loader-percentage" class="text-xs font-mono text-primaryCyan block">0.00%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BACKGROUND SPACE & PHYSICS GRID LAYERS -->
+    <canvas id="parallax-canvas" class="fixed top-0 left-0 w-full h-full -z-30 pointer-events-none"></canvas>
+
+    <!-- FLOATING GLASS NAVIGATION CAPSULE (Strict Structure) -->
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#040608]/50 backdrop-blur-2xl rounded-full px-5 py-3 flex items-center gap-1 shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10 transition-all duration-300">
+        <a href="#home" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="home">Home</a>
+        <a href="#experiences" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="experiences">Experiences</a>
+        <a href="#projects" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="projects">Projects</a>
+        <a href="#books" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="books">Books</a>
+        <a href="https://sabiduddin.blogspot.com/" target="_blank" class="px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10">Blog ↗</a>
+        <a href="#contact" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="contact">Contact</a>
+        
+        <!-- Sliding active indication capsule -->
+        <div id="nav-indicator" class="absolute bg-white/5 border border-white/10 rounded-full h-8 nav-indicator pointer-events-none z-0 transition-all duration-300"></div>
+    </nav>
+
+    <!-- CONTENT PORTAL -->
+    <main class="relative z-10">
+
+        <!-- HEADER DATA PANEL -->
+        <header class="max-w-7xl mx-auto px-6 lg:px-16 py-6 flex items-center justify-between border-b border-white/5 relative z-20">
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 bg-primaryCyan rounded-full animate-ping"></span>
+                <span class="font-wide text-[9px] tracking-[0.3em] font-bold text-white/80 uppercase">CERN-NASA CORE // LOCAL_HOST</span>
+            </div>
+            <div class="text-[10px] text-white/30 font-mono tracking-wider hidden md:flex items-center gap-6">
+                <span>LATITUDE: 22°21'N LONGITUDE: 91°47'E</span>
+                <span>SYSTEM STATE: STABLE</span>
+            </div>
+        </header>
+
+        <!-- 1. HOME SECTION (Reference UI Mapping) -->
+        <section id="home" class="min-h-[90vh] relative flex flex-col justify-between pt-24 pb-16 px-6 lg:px-16 overflow-hidden section-anchor">
+            
+            <!-- Rotating Cosmic Sphere / Portrait container (Top Right) -->
+            <div class="absolute right-[5%] top-[15%] w-72 h-72 lg:w-96 lg:h-96 rounded-full bg-gradient-to-tr from-primaryCyan/10 via-blue-950/5 to-transparent pointer-events-none -z-10 blur-[1px]">
+                <div class="absolute inset-0 rounded-full border border-primaryCyan/10 animate-[spin_60s_linear_infinite]"></div>
+                <div class="absolute inset-8 rounded-full border border-dashed border-white/5 animate-[spin_30s_linear_infinite_reverse]"></div>
+                <!-- Profile holographic projection vector -->
+                <div class="absolute inset-16 rounded-full bg-gradient-to-tr from-primaryCyan/5 to-secondaryTeal/10 flex items-center justify-center border border-white/10">
+                    <div class="text-center space-y-1">
+                        <span class="text-3xl font-wide text-primaryCyan drop-shadow-[0_0_10px_#00E5FF]">S.U.N</span>
+                        <span class="text-[8px] font-mono tracking-[0.3em] text-white/40 block">PHYS_ALIGN v1.2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Central Content Panel -->
+            <div class="my-auto max-w-7xl mx-auto w-full relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <div class="col-span-12 lg:col-span-9 relative">
+                        <!-- Upper metadata index -->
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-12 h-[1px] bg-primaryCyan/55"></span>
+                            <span class="text-[9px] tracking-[0.4em] font-wide uppercase text-primaryCyan animate-pulse">ELECTRODYNAMICS LAB v1.02</span>
+                        </div>
+
+                        <!-- Main particle typography sequence [1] -->
+                        <div class="space-y-1 select-none particle-build">
+                            <h1 class="font-wide text-5xl md:text-7xl lg:text-8xl tracking-wide uppercase text-white leading-none">
+                                SABID UDDIN
+                            </h1>
+                            <h1 class="font-wide text-5xl md:text-7xl lg:text-8xl tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-primaryCyan via-cyan-100 to-white leading-none pl-6 md:pl-16 mt-2 drop-shadow-[0_0_20px_rgba(0,229,255,0.3)]">
+                                NAHIAN
+                            </h1>
+                        </div>
+                    </div>
+
+                    <!-- Side Profile Narrative -->
+                    <div class="col-span-12 lg:col-span-3 lg:pt-16 space-y-4">
+                        <p class="text-xs text-white/50 tracking-wider leading-relaxed font-light">
+                            Theoretical physicist, science communicator, and humanitarian serving as the Chairman of Bigganmona. Operating at the intersection of electrostatic mechanics and young-adult educational systems.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Footer Meta Panels (Reference UI Architecture mapping Sabid's identity) -->
+            <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-end border-t border-white/5 pt-8 z-10">
+                
+                <!-- Bottom Left Actions -->
+                <div class="md:col-span-4 space-y-4">
+                    <span class="text-[10px] tracking-wider text-white/40 block">Initialize dynamic laboratory configuration?</span>
+                    <a href="#experiences" class="inline-flex items-center justify-between border border-white/30 hover:border-primaryCyan hover:text-primaryCyan px-8 py-3.5 w-64 text-[10px] tracking-[0.25em] font-wide uppercase transition-all duration-300 group bg-[#040608]/40">
+                        <span>Initiate System</span>
+                        <span class="transform group-hover:translate-x-1.5 transition-transform">↗</span>
+                    </a>
+                </div>
+
+                <!-- Three Columns representing 3 Core Identities (Scientist, Technologist, Humanitarian) -->
+                <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6 text-[11px] tracking-wide text-white/40 leading-relaxed">
+                    <div class="space-y-1">
+                        <h4 class="font-wide text-[9px] uppercase text-white/80 tracking-widest">01 / Scientist:</h4>
+                        <p class="font-light">Investigating electrostatic vector capacities and dynamic equations. Published 8+ theoretical papers.</p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-wide text-[9px] uppercase text-white/80 tracking-widest">02 / Technologist:</h4>
+                        <p class="font-light">Integrating dynamic mathematical modeling, physics simulation systems, and logical structures.</p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-wide text-[9px] uppercase text-white/80 tracking-widest">03 / Humanitarian:</h4>
+                        <p class="font-light">Democratizing scientific humanism, logical literacy, and secular principles via Bigganmona.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Parallax Mountain Landscape Layers -->
+            <div class="absolute bottom-0 left-0 w-full overflow-hidden pointer-events-none -z-20 h-40 md:h-60">
+                <svg viewBox="0 0 1440 320" class="absolute bottom-0 w-full h-full fill-[#050c18] opacity-20" preserveAspectRatio="none">
+                    <path d="M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,128C672,139,768,213,864,224C960,235,1056,181,1152,149.3C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                </svg>
+                <svg viewBox="0 0 1440 320" class="absolute bottom-0 w-full h-full fill-[#040608]" preserveAspectRatio="none">
+                    <path d="M0,224L60,218.7C120,213,240,203,360,186.7C480,171,600,149,720,165.3C840,181,960,235,1080,240C1200,245,1320,203,1380,181.3L1440,160L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- 2. EXPERIENCES SECTION (Timeline) -->
+        <section id="experiences" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-4xl mx-auto space-y-16">
+                
+                <div class="space-y-4">
+                    <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">RECORD OF MILESTONES</span>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Journey Pathway</h2>
+                </div>
+
+                <div class="relative border-l border-white/10 pl-6 md:pl-12 ml-2 space-y-12">
+                    
+                    <!-- Milestone 1 -->
+                    <div class="relative timeline-card">
+                        <span class="absolute -left-[31px] md:-left-[55px] top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-primaryCyan flex items-center justify-center shadow-[0_0_8px_#00E5FF]">
+                            <span class="w-1.5 h-1.5 bg-primaryCyan rounded-full"></span>
+                        </span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl space-y-4 glass-hud-inner" onmousemove="updateMouseCoords(event, this)">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                <span class="text-[10px] font-wide text-primaryCyan tracking-wider uppercase">June 2021 — Present</span>
+                                <span class="text-[9px] font-mono text-white/30">ID // BIGGANMONA</span>
+                            </div>
+                            <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Founder & Chairman</h3>
+                            <h4 class="text-xs text-white/50 font-light">Bigganmona • Scientific & Rationalist Platform</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                Directing core visual parameters, pedagogical curricula, and science communication initiatives aimed at teaching advanced theoretical mechanics and capacitor principles to secondary high school classes across Bangladesh.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Milestone 2 -->
+                    <div class="relative timeline-card">
+                        <span class="absolute -left-[31px] md:-left-[55px] top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
+                        </span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl space-y-4 glass-hud-inner" onmousemove="updateMouseCoords(event, this)">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">2020 — Present</span>
+                                <span class="text-[9px] font-mono text-white/30">ID // INDEPENDENT_ARCHIVES</span>
+                            </div>
+                            <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Theoretical Physics Researcher</h3>
+                            <h4 class="text-xs text-white/50 font-light">Independent Scientific Authorship</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                Compiling independent physical equations modeling local electrostatic capacities, field vector boundaries, and energy conversion parameters. Authorship of multiple theoretical manuscripts.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Milestone 3 -->
+                    <div class="relative timeline-card">
+                        <span class="absolute -left-[31px] md:-left-[55px] top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
+                        </span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl space-y-4 glass-hud-inner" onmousemove="updateMouseCoords(event, this)">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">2022 — Present</span>
+                                <span class="text-[9px] font-mono text-white/30">ID // DIGITAL_PORTALS</span>
+                            </div>
+                            <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Science Author & Journalist</h3>
+                            <p class="text-xs text-white/40 leading-relaxed font-light font-light">
+                                Drafting analytical literature and investigative essays exploring general astrophysics and circuit logic nodes for academic digital platforms.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PROJECTS SECTION (Includes Fully Functional Sandbox Widget) -->
+        <section id="projects" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-6xl mx-auto space-y-16">
+                
+                <div class="text-center space-y-4">
+                    <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">ACTIVE TESTING CONTAINER</span>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Interactive Research Labs</h2>
+                    <p class="text-xs text-white/40 max-w-lg mx-auto font-light leading-relaxed">
+                        Experiment directly with electrostatic concepts. Select your charge sign below, then click on the testing coordinate matrix to place vector sources and track electric field lines in real time.
+                    </p>
+                </div>
+
+                <!-- Live Computational Laboratory Panel -->
+                <div class="glass-hud p-6 rounded-2xl max-w-4xl mx-auto space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
+                        <div class="flex gap-4 items-center">
+                            <span class="text-[9px] font-wide text-white/50 tracking-wider">ACTIVE SIGN:</span>
+                            <div class="flex gap-2">
+                                <button id="pos-charge-select" class="px-3 py-2 bg-primaryCyan/20 border border-primaryCyan/40 text-primaryCyan text-[8px] font-wide uppercase tracking-wider transition-all">
+                                    [ + ] Positive
+                                </button>
+                                <button id="neg-charge-select" class="px-3 py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-wide uppercase tracking-wider transition-all">
+                                    [ - ] Negative
+                                </button>
+                            </div>
+                        </div>
+                        <button id="clear-charge-nodes" class="px-3 py-2 border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 transition-colors text-[8px] text-red-400 font-wide uppercase tracking-wider">
+                            [ RESET GRID SCHEMATIC ]
+                        </button>
+                    </div>
+
+                    <!-- Sandbox Vector Canvas -->
+                    <div class="relative w-full aspect-[21/9] bg-[#020306] rounded-xl overflow-hidden border border-white/5">
+                        <canvas id="field-simulation-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                        <div class="absolute bottom-3 left-3 bg-[#040608]/90 px-3 py-1.5 rounded border border-white/10 pointer-events-none">
+                            <span id="coord-readout" class="text-[9px] font-mono text-white/40 block">COORDS: X: 0.00 Y: 0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between text-[10px] font-mono text-white/30">
+                        <span>INTEGRATION: ACTIVE (TRACE CONTRAST V1.02)</span>
+                        <span>E = Σ (k·q_i / r_i²) r̂_i</span>
+                    </div>
+                </div>
+
+                <!-- Academic Research Papers -->
+                <div class="pt-16 space-y-8">
+                    <h3 class="font-wide text-xs text-white/80 uppercase tracking-widest">Theoretical Physics Manuscripts</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Paper 1 -->
+                        <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Journal of Modern Physics</span>
+                                    <span class="text-xs text-white/20 font-mono">[01]</span>
+                                </div>
+                                <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">The Auxiliary Law of Motion</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Deriving key mechanics formulas based on velocity properties, dynamic variables, and mass metrics. Completed in 9th grade.
+                                </p>
+                            </div>
+                            <div class="pt-6 border-t border-white/5 mt-6 flex justify-between items-center text-[10px] font-mono text-white/30">
+                                <span>CLASSICAL MECHANICS</span>
+                                <span class="text-primaryCyan/70 hover:text-primaryCyan transition-colors">ARCHIVE ↗</span>
+                            </div>
+                        </div>
+
+                        <!-- Paper 2 -->
+                        <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Independent study</span>
+                                    <span class="text-xs text-white/20 font-mono">[02]</span>
+                                </div>
+                                <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">The Theories of Capacitor</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Evaluating electrostatic field limits and calculating capacitance configurations across coordinate metrics.
+                                </p>
+                            </div>
+                            <div class="pt-6 border-t border-white/5 mt-6 flex justify-between items-center text-[10px] font-mono text-white/30">
+                                <span>ELECTRODYNAMICS</span>
+                                <span class="text-primaryCyan/70 hover:text-primaryCyan transition-colors">ARCHIVE ↗</span>
+                            </div>
+                        </div>
+
+                        <!-- Paper 3 -->
+                        <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Independent study</span>
+                                    <span class="text-xs text-white/20 font-mono">[03]</span>
+                                </div>
+                                <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">The Potential Theory of Force</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Calculating system energy vectors and deriving mechanical constants under central dynamic conditions.
+                                </p>
+                            </div>
+                            <div class="pt-6 border-t border-white/5 mt-6 flex justify-between items-center text-[10px] font-mono text-white/30">
+                                <span>FIELD MECHANICS</span>
+                                <span class="text-primaryCyan/70 hover:text-primaryCyan transition-colors">MANUSCRIPT ↗</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. BOOKS SECTION (Published Literature & Educational Textbook) -->
+        <section id="books" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-4xl mx-auto space-y-16">
+                
+                <div class="space-y-4">
+                    <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">Published Textbooks</span>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Science Literature</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- Book Card 1 -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col sm:flex-row gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <!-- Abstract book model vector -->
+                        <div class="w-full sm:w-1/3 aspect-[3/4] bg-gradient-to-br from-primaryCyan/10 to-cyan-950/20 rounded-xl flex flex-col justify-between p-4 border border-white/5 relative overflow-hidden">
+                            <span class="text-[8px] font-mono tracking-widest text-primaryCyan uppercase block font-bold">ROKOMARI BESTSELLER</span>
+                            <div class="w-full text-center py-4 text-3xl">⚡</div>
+                            <span class="text-[8px] text-white/40 block text-right font-mono">S. U. NAHIAN</span>
+                        </div>
+
+                        <div class="w-full sm:w-2/3 flex flex-col justify-between py-1">
+                            <div class="space-y-3">
+                                <span class="text-[9px] font-mono tracking-wider bg-primaryCyan/10 text-primaryCyan px-2.5 py-0.5 rounded uppercase">SSC level</span>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Mojar Torit (মজার তড়িৎ)</h3>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    An essential introduction designed to make electrodynamics and electric capacitor concepts thoroughly digestible for junior secondary pupils with fun illustrations and proofs. Published in 2022.
+                                </p>
+                            </div>
+                            <button onclick="openBookModal('Mojar Torit', 'Publisher: Rokomari Publications<br>Focus: Secondary Class 9-10 Electrodynamics', 'Written and compiled by Sabid Uddin Nahian in 2022. It is configured specifically to present classical circuitry equations, electrostatics potentials, and energy vector variables in a highly readable and intuitive format for high school physics pupils.')" class="mt-4 sm:mt-0 text-left text-xs font-mono text-primaryCyan hover:underline block relative z-20">
+                                COGNITIVE SCAN →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Book Card 2 (Pending stage) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col sm:flex-row gap-6 opacity-50 hover:opacity-100 transition-all duration-300">
+                        <div class="w-full sm:w-1/3 aspect-[3/4] bg-white/5 rounded-xl flex flex-col justify-between p-4 border border-white/5 relative overflow-hidden">
+                            <span class="text-[8px] font-mono tracking-widest text-white/30 uppercase block font-bold">IN DEVELOPMENT</span>
+                            <div class="w-full text-center py-4 text-3xl text-white/10">⚛</div>
+                            <span class="text-[8px] text-white/20 block text-right font-mono">S. U. NAHIAN</span>
+                        </div>
+
+                        <div class="w-full sm:w-2/3 flex flex-col justify-between py-1">
+                            <div class="space-y-3">
+                                <span class="text-[9px] font-mono tracking-wider bg-white/5 px-2.5 py-0.5 rounded text-white/40 uppercase">MANUSCRIPT</span>
+                                <h3 class="font-wide text-sm md:text-base text-white/80 uppercase tracking-wider">Potential Theory Dynamics</h3>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Comprehensive guide compiling complex vector equations and physical limits for secondary classes.
+                                </p>
+                            </div>
+                            <span class="text-xs font-mono text-white/20">STATUS: PEER REVIEW</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 5. CONTACT SECTION -->
+        <section id="contact" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-4xl mx-auto glass-hud rounded-3xl p-8 md:p-12 relative overflow-hidden">
+                <div class="space-y-8 relative z-10">
+                    
+                    <div class="space-y-3">
+                        <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">TRANSMISSION LINK</span>
+                        <h2 class="font-wide text-3xl uppercase tracking-wider text-white">Let's Inspire the Next Generation.</h2>
+                        <p class="text-xs text-white/40 max-w-xl font-light leading-relaxed">
+                            Connect with Sabid Uddin Nahian regarding textbook designs, physics education curricula, or science outreach programs.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">Email Channel</span>
+                            <a href="mailto:uddinsabid5@gmail.com" class="text-xs font-mono text-primaryCyan hover:underline block">uddinsabid5@gmail.com</a>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">Scientific Blog</span>
+                            <a href="https://sabiduddin.blogspot.com/" target="_blank" class="text-xs font-mono text-secondaryTeal hover:underline block">sabiduddin.blogspot.com ↗</a>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">LinkedIn Index</span>
+                            <a href="https://www.linkedin.com/in/sabid-uddin-nahian-4437a61ba/" target="_blank" class="text-xs font-mono text-white/80 hover:underline block">sabid-uddin-nahian-4437a61ba ↗</a>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">Scientific Platform</span>
+                            <span class="text-xs font-mono text-white/50 block">Chairman @ Bigganmona</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-8 border-t border-white/5 flex flex-wrap gap-4 items-center justify-between">
+                        <span class="text-[10px] text-white/20 font-mono">ENCRYPTED // CTG_BD</span>
+                        <div class="flex gap-4">
+                            <a href="https://www.linkedin.com/in/sabid-uddin-nahian-4437a61ba/" target="_blank" class="text-[10px] text-white/40 hover:text-primaryCyan font-wide uppercase tracking-wider">LinkedIn</a>
+                            <a href="https://sabiduddin.blogspot.com/" target="_blank" class="text-[10px] text-white/40 hover:text-secondaryTeal font-wide uppercase tracking-wider">Blog</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Radar Book Details Modal Frame -->
+    <div id="book-modal" class="fixed inset-0 z-50 bg-[#040608]/90 backdrop-blur-xl hidden flex items-center justify-center p-6 transition-all duration-300 opacity-0">
+        <div class="glass-hud max-w-lg w-full rounded-2xl p-6 md:p-8 space-y-6 relative">
+            <button onclick="closeBookModal()" class="absolute top-4 right-4 text-white/30 hover:text-white font-mono text-xs uppercase tracking-wider">[ Close Esc ]</button>
+            
+            <div class="space-y-2">
+                <span id="modal-meta" class="text-[10px] font-mono text-primaryCyan uppercase tracking-widest block"></span>
+                <h3 id="modal-title" class="font-wide text-lg text-white uppercase"></h3>
+            </div>
+            
+            <div class="border-t border-white/5 pt-4">
+                <p id="modal-desc" class="text-xs text-white/50 leading-relaxed font-light"></p>
+            </div>
+
+            <div class="flex gap-4 pt-2">
+                <a href="https://www.rokomari.com/" target="_blank" class="px-5 py-2.5 bg-primaryCyan text-cosmicBg font-wide text-[9px] tracking-wider rounded uppercase font-bold hover:bg-white transition-colors">
+                    Acquire Textbook
+                </a>
+                <button onclick="closeBookModal()" class="px-5 py-2.5 border border-white/10 text-white font-wide text-[9px] tracking-wider rounded uppercase hover:border-white/30 transition-colors">
+                    Terminate Scan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT INFRASTRUCTURE -->
+    <script>
+        // High-performance Parallax Background Canvas
+        const pCanvas = document.getElementById('parallax-canvas');
+        const pCtx = pCanvas.getContext('2d');
+        let pWidth, pHeight;
+
+        function resizeParallax() {
+            pWidth = pCanvas.width = window.innerWidth;
+            pHeight = pCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeParallax);
+        resizeParallax();
+
+        const celestialDust = [];
+        for (let i = 0; i < 65; i++) {
+            celestialDust.push({
+                x: Math.random() * pWidth,
+                y: Math.random() * pHeight,
+                size: Math.random() * 1.5 + 0.5,
+                speed: Math.random() * 0.08 + 0.02,
+                alpha: Math.random(),
+                fade: Math.random() * 0.004 + 0.001
+            });
+        }
+
+        function animateParallax() {
+            pCtx.fillStyle = '#040608';
+            pCtx.fillRect(0, 0, pWidth, pHeight);
+
+            // Draw Parallax coordinates grids
+            pCtx.strokeStyle = 'rgba(0, 229, 255, 0.02)';
+            pCtx.lineWidth = 1;
+            const gridSpacing = 60;
+            
+            // Adjust coordinates based on scroll distance to mock infinite grid
+            const scrollOffset = window.pageYOffset * 0.15;
+            
+            for (let x = 0; x < pWidth; x += gridSpacing) {
+                pCtx.beginPath();
+                pCtx.moveTo(x, 0);
+                pCtx.lineTo(x, pHeight);
+                pCtx.stroke();
+            }
+            for (let y = -gridSpacing; y < pHeight + gridSpacing; y += gridSpacing) {
+                pCtx.beginPath();
+                pCtx.moveTo(0, y - (scrollOffset % gridSpacing));
+                pCtx.lineTo(pWidth, y - (scrollOffset % gridSpacing));
+                pCtx.stroke();
+            }
+
+            // Draw celestial dust particles
+            celestialDust.forEach(d => {
+                d.y -= d.speed;
+                if (d.y < 0) {
+                    d.y = pHeight;
+                    d.x = Math.random() * pWidth;
+                }
+                d.alpha += d.fade;
+                if (d.alpha > 0.85 || d.alpha < 0.15) d.fade = -d.fade;
+
+                pCtx.fillStyle = `rgba(0, 229, 255, ${d.alpha * 0.25})`;
+                pCtx.beginPath();
+                pCtx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+                pCtx.fill();
+            });
+
+            requestAnimationFrame(animateParallax);
+        }
+        animateParallax();
+
+
+        // ==========================================
+        // ELECTRODYNAMICS SIMULATOR CORE
+        // ==========================================
+        const simCanvas = document.getElementById('field-simulation-canvas');
+        const sCtx = simCanvas.getContext('2d');
+        let simWidth, simHeight;
+        let selectedChargeType = 1; // 1 = Pos, -1 = Neg
+        let chargedNodes = [];
+
+        function resizeSandbox() {
+            const rect = simCanvas.parentNode.getBoundingClientRect();
+            simWidth = simCanvas.width = rect.width;
+            simHeight = simCanvas.height = rect.height;
+            drawSandbox();
+        }
+        window.addEventListener('resize', resizeSandbox);
+        setTimeout(resizeSandbox, 100);
+
+        simCanvas.addEventListener('mousemove', (e) => {
+            const rect = simCanvas.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width * 10 - 5).toFixed(2);
+            const y = (-(e.clientY - rect.top) / rect.height * 10 + 5).toFixed(2);
+            document.getElementById('coord-readout').innerText = `COORDS: X: ${x} Y: ${y}`;
+        });
+
+        simCanvas.addEventListener('mousedown', (e) => {
+            const rect = simCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            chargedNodes.push({ x, y, q: selectedChargeType });
+            drawSandbox();
+        });
+
+        const posSelect = document.getElementById('pos-charge-select');
+        const negSelect = document.getElementById('neg-charge-select');
+
+        posSelect.addEventListener('click', () => {
+            selectedChargeType = 1;
+            posSelect.className = "px-3 py-2 bg-primaryCyan/20 border border-primaryCyan/40 text-primaryCyan text-[8px] font-wide uppercase tracking-wider transition-all";
+            negSelect.className = "px-3 py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-wide uppercase tracking-wider transition-all";
+        });
+
+        negSelect.addEventListener('click', () => {
+            selectedChargeType = -1;
+            negSelect.className = "px-3 py-2 bg-secondaryTeal/20 border border-secondaryTeal/40 text-secondaryTeal text-[8px] font-wide uppercase tracking-wider transition-all";
+            posSelect.className = "px-3 py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-wide uppercase tracking-wider transition-all";
+        });
+
+        document.getElementById('clear-charge-nodes').addEventListener('click', () => {
+            chargedNodes = [];
+            drawSandbox();
+        });
+
+        function getElectrostaticVector(x, y) {
+            let Ex = 0;
+            let Ey = 0;
+            for (let node of chargedNodes) {
+                let dx = x - node.x;
+                let dy = y - node.y;
+                let r2 = dx*dx + dy*dy;
+                let r = Math.sqrt(r2);
+                if (r > 6) {
+                    Ex += (node.q * dx) / (r2 * r);
+                    Ey += (node.q * dy) / (r2 * r);
+                }
+            }
+            return { x: Ex, y: Ey };
+        }
+
+        function drawSandbox() {
+            sCtx.fillStyle = '#020306';
+            sCtx.fillRect(0, 0, simWidth, simHeight);
+
+            sCtx.lineWidth = 1;
+            for (let node of chargedNodes) {
+                if (node.q > 0) { // Positive source traces field lines outwards
+                    const lines = 16;
+                    for (let i = 0; i < lines; i++) {
+                        const angle = (i / lines) * Math.PI * 2;
+                        let px = node.x + Math.cos(angle) * 8;
+                        let py = node.y + Math.sin(angle) * 8;
+                        
+                        sCtx.beginPath();
+                        sCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+                        sCtx.moveTo(px, py);
+                        
+                        let steps = 0;
+                        while (steps < 220) {
+                            let E = getElectrostaticVector(px, py);
+                            let E_mag = Math.sqrt(E.x*E.x + E.y*E.y);
+                            if (E_mag === 0) break;
+                            
+                            px += (E.x / E_mag) * 3;
+                            py += (E.y / E_mag) * 3;
+                            
+                            sCtx.lineTo(px, py);
+                            
+                            let ended = false;
+                            for (let other of chargedNodes) {
+                                if (other !== node && Math.sqrt((px - other.x)**2 + (py - other.y)**2) < 8) {
+                                    ended = true;
+                                    break;
+                                }
+                            }
+                            if (ended || px < 0 || px > simWidth || py < 0 || py > simHeight) break;
+                            steps++;
+                        }
+                        sCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw charges nodes on top
+            chargedNodes.forEach(c => {
+                const isPos = c.q > 0;
+                sCtx.beginPath();
+                sCtx.arc(c.x, c.y, 8, 0, Math.PI * 2);
+                sCtx.fillStyle = isPos ? '#00E5FF' : '#14B8A6';
+                sCtx.fill();
+                
+                sCtx.fillStyle = '#020306';
+                sCtx.font = 'bold 9px monospace';
+                sCtx.textAlign = 'center';
+                sCtx.textBaseline = 'middle';
+                sCtx.fillText(isPos ? '+' : '-', c.x, c.y);
+            });
+        }
+
+
+        // ==========================================
+        // 3D CARD INTERACTION SYSTEM
+        // ==========================================
+        const tiltCards = document.querySelectorAll('.hover-tilt');
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -6; // Maximum 6 degree rotation
+                const rotateY = ((x - centerX) / centerX) * 6;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+            });
+        });
+
+        // Mouse Spotlight properties
+        function updateMouseCoords(e, element) {
+            const rect = element.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            element.style.setProperty('--mouse-x', `${x}px`);
+            element.style.setProperty('--mouse-y', `${y}px`);
+        }
+
+
+        // ==========================================
+        // NAVIGATION INDICATOR CAPSULE CONTROL
+        // ==========================================
+        const navLinks = document.querySelectorAll('.nav-link');
+        const indicator = document.getElementById('nav-indicator');
+        const sections = document.querySelectorAll('.section-anchor');
+
+        function positionIndicator(link) {
+            indicator.style.width = `${link.offsetWidth}px`;
+            indicator.style.left = `${link.offsetLeft}px`;
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const targetId = link.getAttribute('data-target');
+                if (targetId) {
+                    e.preventDefault();
+                    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                    positionIndicator(link);
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 180) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-white');
+                link.classList.add('text-white/50');
+                if (link.getAttribute('data-target') === current) {
+                    link.classList.add('text-white');
+                    link.classList.remove('text-white/50');
+                    positionIndicator(link);
+                }
+            });
+        });
+
+
+        // ==========================================
+        // LOADER DEPLOYMENT SEQUENCE
+        // ==========================================
+        let progress = 0;
+        const pBar = document.getElementById('loader-bar');
+        const pText = document.getElementById('loader-percentage');
+        
+        const trackingInterval = setInterval(() => {
+            progress += Math.random() * 9 + 3;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(trackingInterval);
+                const loader = document.getElementById('loading-screen');
+                loader.classList.add('opacity-0');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    resizeSandbox(); // Synchronize laboratory sandbox canvas dimension metrics
+                }, 1000);
+            }
+            pBar.style.width = `${progress}%`;
+            pText.innerText = `${progress.toFixed(2)}%`;
+        }, 100);
+
+        // Books detail modal actions
+        function openBookModal(title, meta, description) {
+            const modal = document.getElementById('book-modal');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-meta').innerHTML = meta;
+            document.getElementById('modal-desc').innerHTML = description;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 50);
+        }
+
+        function closeBookModal() {
+            const modal = document.getElementById('book-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeBookModal();
+        });
+    </script>
+</body>
+</html>
