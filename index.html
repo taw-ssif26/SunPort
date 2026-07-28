@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sabid Uddin Nahian • Cosmic Laboratory Portfolio</title>
+    <title>Sabid Uddin Nahian</title>
     
     <!-- Google Fonts: Syncopate (Wide Futuristic) & Space Grotesk (Scientific Sans) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,28 +47,64 @@
             background: rgba(0, 229, 255, 0.7);
         }
 
-        /* Glass HUD Component Framework */
-        .glass-hud {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
-            position: relative;
-            transform-style: preserve-3d;
-            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        /* Hide Scrollbar for Navigation capsule */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
+        /* Glass HUD Component Framework with Corner Markers */
+        .glass-hud {
+            background: rgba(4, 6, 8, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Animated HUD Brackets (Top-Left and Bottom-Right) */
         .glass-hud::before, .glass-hud::after {
             content: '';
             position: absolute;
-            width: 8px; height: 8px;
-            border-color: rgba(0, 229, 255, 0.3);
+            width: 10px; height: 10px;
+            border-color: rgba(0, 229, 255, 0.25);
             border-style: solid;
             pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 20;
         }
-        .glass-hud::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
-        .glass-hud::after { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+        .glass-hud::before { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; }
+        .glass-hud::after { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; }
+
+        /* Programmatically Injected Corners (Top-Right and Bottom-Left) */
+        .glass-hud .corner-tr, .glass-hud .corner-bl {
+            content: '';
+            position: absolute;
+            width: 10px; height: 10px;
+            border-color: rgba(0, 229, 255, 0.25);
+            border-style: solid;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 20;
+        }
+        .glass-hud .corner-tr { top: -1px; right: -1px; border-width: 1.5px 1.5px 0 0; }
+        .glass-hud .corner-bl { bottom: -1px; left: -1px; border-width: 0 0 1.5px 1.5px; }
+
+        /* Dynamic Expand Animation on Hover */
+        .glass-hud:hover {
+            border-color: rgba(0, 229, 255, 0.2);
+            box-shadow: 0 15px 45px -5px rgba(0, 229, 255, 0.15);
+        }
+        .glass-hud:hover::before { border-color: #00E5FF; width: 20px; height: 20px; filter: drop-shadow(0 0 4px #00E5FF); }
+        .glass-hud:hover::after { border-color: #14B8A6; width: 20px; height: 20px; filter: drop-shadow(0 0 4px #14B8A6); }
+        .glass-hud:hover .corner-tr { border-color: #14B8A6; width: 20px; height: 20px; filter: drop-shadow(0 0 4px #14B8A6); }
+        .glass-hud:hover .corner-bl { border-color: #00E5FF; width: 20px; height: 20px; filter: drop-shadow(0 0 4px #00E5FF); }
 
         /* Mouse tracking light spotlight on cards */
         .glass-hud-inner::before {
@@ -76,7 +112,7 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: radial-gradient(350px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 229, 255, 0.06), transparent 80%);
+            background: radial-gradient(350px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 229, 255, 0.08), transparent 80%);
             z-index: 1;
             pointer-events: none;
             opacity: 0;
@@ -139,7 +175,7 @@
 
     <!-- CINEMATIC LOADING SCREEN (Physic Symbol Morph) -->
     <div id="loading-screen" class="fixed inset-0 z-50 bg-[#040608] flex flex-col items-center justify-center transition-opacity duration-1000">
-        <div class="relative w-56 h-56 flex items-center justify-center">
+        <div class="relative w-56 h-56 flex items-center justify-center scale-90 sm:scale-100">
             <!-- Central Active Nucleus -->
             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primaryCyan to-secondaryTeal flex items-center justify-center shadow-[0_0_30px_#00E5FF]">
                 <span class="text-xs font-mono text-cosmicBg font-bold">Ψ</span>
@@ -167,13 +203,14 @@
     <canvas id="parallax-canvas" class="fixed top-0 left-0 w-full h-full -z-30 pointer-events-none"></canvas>
 
     <!-- FLOATING GLASS NAVIGATION CAPSULE (Strict Structure) -->
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#040608]/50 backdrop-blur-2xl rounded-full px-5 py-3 flex items-center gap-1 shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10 transition-all duration-300">
-        <a href="#home" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="home">Home</a>
-        <a href="#experiences" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="experiences">Experiences</a>
-        <a href="#projects" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="projects">Projects</a>
-        <a href="#books" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="books">Books</a>
-        <a href="https://sabiduddin.blogspot.com/" target="_blank" class="px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10">Blog ↗</a>
-        <a href="#contact" class="nav-link px-4 py-1.5 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="contact">Contact</a>
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#040608]/75 backdrop-blur-2xl rounded-full px-4 py-2.5 flex items-center gap-1 shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10 transition-all duration-300 max-w-[92vw] overflow-x-auto whitespace-nowrap scrollbar-none scroll-smooth">
+        <a href="#home" class="nav-link px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="home">Home</a>
+        <a href="#experiences" class="nav-link px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="experiences">Experiences</a>
+        <a href="#projects" class="nav-link px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="projects">Projects</a>
+        <a href="#sandbox" class="nav-link px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="sandbox">Simulation Lab</a>
+        <a href="#books" class="nav-link px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="books">Literature</a>
+        <a href="https://sabiduddin.blogspot.com/" target="_blank" class="px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10">Blog ↗</a>
+        <a href="#contact" class="nav-link px-3 py-1 text-xs tracking-wider font-space text-white/50 hover:text-white transition-all relative z-10" data-target="contact">Contact</a>
         
         <!-- Sliding active indication capsule -->
         <div id="nav-indicator" class="absolute bg-white/5 border border-white/10 rounded-full h-8 nav-indicator pointer-events-none z-0 transition-all duration-300"></div>
@@ -190,51 +227,51 @@
             </div>
             <div class="text-[10px] text-white/30 font-mono tracking-wider hidden md:flex items-center gap-6">
                 <span>LATITUDE: 22°21'N LONGITUDE: 91°47'E</span>
-                <span>SYSTEM STATE: STABLE</span>
+                <span>SYSTEM STATE: ACTIVE_RESONANCE</span>
             </div>
         </header>
 
-        <!-- 1. HOME SECTION (Reference UI Mapping) -->
-        <section id="home" class="min-h-[90vh] relative flex flex-col justify-between pt-24 pb-16 px-6 lg:px-16 overflow-hidden section-anchor">
+        <!-- 1. HOME SECTION -->
+        <section id="home" class="min-h-[90vh] relative flex flex-col justify-between pt-16 sm:pt-24 pb-16 px-6 lg:px-16 overflow-hidden section-anchor">
             
-            <!-- Rotating Cosmic Sphere / Portrait container (Top Right) -->
-            <div class="absolute right-[5%] top-[15%] w-72 h-72 lg:w-96 lg:h-96 rounded-full bg-gradient-to-tr from-primaryCyan/10 via-blue-950/5 to-transparent pointer-events-none -z-10 blur-[1px]">
+            <!-- Rotating Cosmic Sphere / Portrait container (Top Right / Centered Background on Mobile) -->
+            <div class="absolute right-1/2 translate-x-1/2 top-[10%] lg:right-[5%] lg:top-[15%] lg:translate-x-0 w-64 h-64 sm:w-72 sm:h-72 lg:w-96 lg:h-96 rounded-full bg-gradient-to-tr from-primaryCyan/10 via-blue-950/5 to-transparent pointer-events-none -z-10 blur-[1px] opacity-35 lg:opacity-100">
                 <div class="absolute inset-0 rounded-full border border-primaryCyan/10 animate-[spin_60s_linear_infinite]"></div>
                 <div class="absolute inset-8 rounded-full border border-dashed border-white/5 animate-[spin_30s_linear_infinite_reverse]"></div>
                 <!-- Profile holographic projection vector -->
                 <div class="absolute inset-16 rounded-full bg-gradient-to-tr from-primaryCyan/5 to-secondaryTeal/10 flex items-center justify-center border border-white/10">
                     <div class="text-center space-y-1">
-                        <span class="text-3xl font-wide text-primaryCyan drop-shadow-[0_0_10px_#00E5FF]">S.U.N</span>
+                        <span class="text-2xl sm:text-3xl font-wide text-primaryCyan drop-shadow-[0_0_10px_#00E5FF]">S.U.N</span>
                         <span class="text-[8px] font-mono tracking-[0.3em] text-white/40 block">PHYS_ALIGN v1.2</span>
                     </div>
                 </div>
             </div>
 
             <!-- Central Content Panel -->
-            <div class="my-auto max-w-7xl mx-auto w-full relative z-10">
+            <div class="my-auto max-w-7xl mx-auto w-full relative z-10 pt-10 lg:pt-0">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     
-                    <div class="col-span-12 lg:col-span-9 relative">
+                    <div class="col-span-12 lg:col-span-9 relative text-center lg:text-left">
                         <!-- Upper metadata index -->
-                        <div class="flex items-center gap-3 mb-6">
+                        <div class="flex items-center justify-center lg:justify-start gap-3 mb-6">
                             <span class="w-12 h-[1px] bg-primaryCyan/55"></span>
                             <span class="text-[9px] tracking-[0.4em] font-wide uppercase text-primaryCyan animate-pulse">ELECTRODYNAMICS LAB v1.02</span>
                         </div>
 
-                        <!-- Main particle typography sequence [1] -->
+                        <!-- Main particle typography sequence -->
                         <div class="space-y-1 select-none particle-build">
-                            <h1 class="font-wide text-5xl md:text-7xl lg:text-8xl tracking-wide uppercase text-white leading-none">
+                            <h1 class="font-wide text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-wide uppercase text-white leading-none">
                                 SABID UDDIN
                             </h1>
-                            <h1 class="font-wide text-5xl md:text-7xl lg:text-8xl tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-primaryCyan via-cyan-100 to-white leading-none pl-6 md:pl-16 mt-2 drop-shadow-[0_0_20px_rgba(0,229,255,0.3)]">
+                            <h1 class="font-wide text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-primaryCyan via-cyan-100 to-white leading-none pl-2 sm:pl-6 md:pl-16 mt-2 drop-shadow-[0_0_20px_rgba(0,229,255,0.3)]">
                                 NAHIAN
                             </h1>
                         </div>
                     </div>
 
                     <!-- Side Profile Narrative -->
-                    <div class="col-span-12 lg:col-span-3 lg:pt-16 space-y-4">
-                        <p class="text-xs text-white/50 tracking-wider leading-relaxed font-light">
+                    <div class="col-span-12 lg:col-span-3 lg:pt-16 space-y-4 text-center lg:text-left">
+                        <p class="text-xs sm:text-sm text-white/50 tracking-wider leading-relaxed font-light max-w-md mx-auto lg:max-w-none">
                             Theoretical physicist, science communicator, and humanitarian serving as the Chairman of Bigganmona. Operating at the intersection of electrostatic mechanics and young-adult educational systems.
                         </p>
                     </div>
@@ -242,23 +279,23 @@
                 </div>
             </div>
 
-            <!-- Footer Meta Panels (Reference UI Architecture mapping Sabid's identity) -->
-            <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-end border-t border-white/5 pt-8 z-10">
+            <!-- Footer Meta Panels -->
+            <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-end border-t border-white/5 pt-8 z-10 mt-12 lg:mt-0">
                 
                 <!-- Bottom Left Actions -->
-                <div class="md:col-span-4 space-y-4">
+                <div class="md:col-span-4 space-y-4 flex flex-col items-center md:items-start text-center md:text-left">
                     <span class="text-[10px] tracking-wider text-white/40 block">Initialize dynamic laboratory configuration?</span>
-                    <a href="#experiences" class="inline-flex items-center justify-between border border-white/30 hover:border-primaryCyan hover:text-primaryCyan px-8 py-3.5 w-64 text-[10px] tracking-[0.25em] font-wide uppercase transition-all duration-300 group bg-[#040608]/40">
+                    <a href="#experiences" class="inline-flex items-center justify-between border border-white/30 hover:border-primaryCyan hover:text-primaryCyan px-8 py-3.5 w-64 text-[10px] tracking-[0.25em] font-wide uppercase transition-all duration-300 group bg-[#040608]/40 hover:shadow-[0_0_15px_rgba(0,229,255,0.2)]">
                         <span>Initiate System</span>
                         <span class="transform group-hover:translate-x-1.5 transition-transform">↗</span>
                     </a>
                 </div>
 
                 <!-- Three Columns representing 3 Core Identities (Scientist, Technologist, Humanitarian) -->
-                <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6 text-[11px] tracking-wide text-white/40 leading-relaxed">
+                <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6 text-[11px] tracking-wide text-white/40 leading-relaxed text-center sm:text-left">
                     <div class="space-y-1">
                         <h4 class="font-wide text-[9px] uppercase text-white/80 tracking-widest">01 / Scientist:</h4>
-                        <p class="font-light">Investigating electrostatic vector capacities and dynamic equations. Published 8+ theoretical papers.</p>
+                        <p class="font-light">Investigating electrostatic vector capacities and dynamic equations. Published theoretical papers.</p>
                     </div>
                     <div class="space-y-1">
                         <h4 class="font-wide text-[9px] uppercase text-white/80 tracking-widest">02 / Technologist:</h4>
@@ -284,66 +321,171 @@
         </section>
 
         <!-- 2. EXPERIENCES SECTION (Timeline) -->
-        <section id="experiences" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
-            <div class="max-w-4xl mx-auto space-y-16">
+        <section id="experiences" class="py-20 sm:py-32 bg-[#040608] border-t border-white/5 px-4 sm:px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-5xl mx-auto space-y-16">
                 
-                <div class="space-y-4">
+                <div class="space-y-4 text-center sm:text-left">
                     <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">RECORD OF MILESTONES</span>
                     <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Journey Pathway</h2>
                 </div>
 
-                <div class="relative border-l border-white/10 pl-6 md:pl-12 ml-2 space-y-12">
+                <!-- Resilient responsive timeline layout structure -->
+                <div class="relative border-l border-white/10 pl-6 sm:pl-12 ml-4 sm:ml-8 space-y-12">
                     
-                    <!-- Milestone 1 -->
+                    <!-- Milestone 1: Co-Founder & Chairman (Bigganmona) -->
                     <div class="relative timeline-card">
-                        <span class="absolute -left-[31px] md:-left-[55px] top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-primaryCyan flex items-center justify-center shadow-[0_0_8px_#00E5FF]">
+                        <span class="absolute left-0 -translate-x-1/2 top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-primaryCyan flex items-center justify-center shadow-[0_0_8px_#00E5FF]">
                             <span class="w-1.5 h-1.5 bg-primaryCyan rounded-full"></span>
                         </span>
-                        <div class="glass-hud p-6 md:p-8 rounded-xl space-y-4 glass-hud-inner" onmousemove="updateMouseCoords(event, this)">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
-                                <span class="text-[10px] font-wide text-primaryCyan tracking-wider uppercase">June 2021 — Present</span>
-                                <span class="text-[9px] font-mono text-white/30">ID // BIGGANMONA</span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <!-- Dynamic Holographic Placeholder Image -->
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-primaryCyan/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
+                                <svg class="w-12 h-12 text-primaryCyan/30 group-hover:text-primaryCyan/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
                             </div>
-                            <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Founder & Chairman</h3>
-                            <h4 class="text-xs text-white/50 font-light">Bigganmona • Scientific & Rationalist Platform</h4>
-                            <p class="text-xs text-white/40 leading-relaxed font-light">
-                                Directing core visual parameters, pedagogical curricula, and science communication initiatives aimed at teaching advanced theoretical mechanics and capacitor principles to secondary high school classes across Bangladesh.
-                            </p>
+                            <div class="md:col-span-9 space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                    <span class="text-[10px] font-wide text-primaryCyan tracking-wider uppercase">June 2023 — Present</span>
+                                    <span class="text-[9px] font-mono text-white/30">ID // BIGGANMONA_CHAIR</span>
+                                </div>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Co-Founder & Chairman</h3>
+                                <h4 class="text-xs text-white/50 font-light">Bigganmona • Scientific & Rationalist Platform</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Leading the organization's strategic vision, partnerships, and STEM education initiatives. Overseeing research programs, educational events, community outreach, and technology-driven learning projects that make science accessible to students across Bangladesh.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Milestone 2 -->
+                    <!-- Milestone 2: Key Person (3ZERO Club) -->
                     <div class="relative timeline-card">
-                        <span class="absolute -left-[31px] md:-left-[55px] top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                        <span class="absolute left-0 -translate-x-1/2 top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
                             <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
                         </span>
-                        <div class="glass-hud p-6 md:p-8 rounded-xl space-y-4 glass-hud-inner" onmousemove="updateMouseCoords(event, this)">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
-                                <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">2020 — Present</span>
-                                <span class="text-[9px] font-mono text-white/30">ID // INDEPENDENT_ARCHIVES</span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-[#14B8A6]/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
+                                <svg class="w-12 h-12 text-[#14B8A6]/30 group-hover:text-[#14B8A6]/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,184,166,0.05)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
                             </div>
-                            <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Theoretical Physics Researcher</h3>
-                            <h4 class="text-xs text-white/50 font-light">Independent Scientific Authorship</h4>
-                            <p class="text-xs text-white/40 leading-relaxed font-light">
-                                Compiling independent physical equations modeling local electrostatic capacities, field vector boundaries, and energy conversion parameters. Authorship of multiple theoretical manuscripts.
-                            </p>
+                            <div class="md:col-span-9 space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                    <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">July 2025 — Present</span>
+                                    <span class="text-[9px] font-mono text-white/30">ID // 3ZERO_CORE</span>
+                                </div>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Key Person</h3>
+                                <h4 class="text-xs text-white/50 font-light">3ZERO Club</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Supporting leadership initiatives and community engagement while contributing to projects aligned with sustainable development, carbon neutrality, and active social impact networks.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Milestone 3 -->
+                    <!-- Milestone 3: CEO (Bigganmona) -->
                     <div class="relative timeline-card">
-                        <span class="absolute -left-[31px] md:-left-[55px] top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                        <span class="absolute left-0 -translate-x-1/2 top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
                             <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
                         </span>
-                        <div class="glass-hud p-6 md:p-8 rounded-xl space-y-4 glass-hud-inner" onmousemove="updateMouseCoords(event, this)">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
-                                <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">2022 — Present</span>
-                                <span class="text-[9px] font-mono text-white/30">ID // DIGITAL_PORTALS</span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-primaryCyan/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
+                                <svg class="w-12 h-12 text-primaryCyan/30 group-hover:text-primaryCyan/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
                             </div>
-                            <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Science Author & Journalist</h3>
-                            <p class="text-xs text-white/40 leading-relaxed font-light font-light">
-                                Drafting analytical literature and investigative essays exploring general astrophysics and circuit logic nodes for academic digital platforms.
-                            </p>
+                            <div class="md:col-span-9 space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                    <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">August 2021 — June 2023</span>
+                                    <span class="text-[9px] font-mono text-white/30">ID // BIGGANMONA_EXEC</span>
+                                </div>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Chief Executive Officer</h3>
+                                <h4 class="text-xs text-white/50 font-light">Bigganmona • Scientific & Rationalist Platform</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Directed daily operations and structural development during early bootstrap phases. Led volunteer deployment strategies, organized introductory STEM panels, and constructed scaling methodologies across academic chapters.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Milestone 4: Wikipedia Author -->
+                    <div class="relative timeline-card">
+                        <span class="absolute left-0 -translate-x-1/2 top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
+                        </span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-[#14B8A6]/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
+                                <svg class="w-12 h-12 text-[#14B8A6]/30 group-hover:text-[#14B8A6]/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,184,166,0.05)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="md:col-span-9 space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                    <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">September 2020 — December 2022</span>
+                                    <span class="text-[9px] font-mono text-white/30">ID // WIKI_EDITOR</span>
+                                </div>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Author & Contributor</h3>
+                                <h4 class="text-xs text-white/50 font-light">Wikipedia • Open Knowledge Base</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Created and optimized scientific encyclopedia literature, validating references, and maintaining academic translation layers to bring complex scientific findings to open-source records.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Milestone 5: BNCC Cadet Sergeant -->
+                    <div class="relative timeline-card">
+                        <span class="absolute left-0 -translate-x-1/2 top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
+                        </span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-primaryCyan/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
+                                <svg class="w-12 h-12 text-primaryCyan/30 group-hover:text-primaryCyan/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="md:col-span-9 space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                    <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">March 2018 — January 2022</span>
+                                    <span class="text-[9px] font-mono text-white/30">ID // BNCC_COMMAND</span>
+                                </div>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Cadet Sergeant</h3>
+                                <h4 class="text-xs text-white/50 font-light">Bangladesh National Cadet Corps (BNCC)</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Underwent military leadership protocols, culminating in a 15-day Regiment Camp. Directed ground logistics during the national COVID-19 student vaccination campaigns, establishing robust field command pipelines.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Milestone 6: BTV Musician -->
+                    <div class="relative timeline-card">
+                        <span class="absolute left-0 -translate-x-1/2 top-1.5 w-4 h-4 rounded-full bg-[#040608] border border-white/20 flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
+                        </span>
+                        <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-[#14B8A6]/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
+                                <svg class="w-12 h-12 text-[#14B8A6]/30 group-hover:text-[#14B8A6]/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                </svg>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,184,166,0.05)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="md:col-span-9 space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                    <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">January 2017 — June 2019</span>
+                                    <span class="text-[9px] font-mono text-white/30">ID // BTV_ACOUSTICS</span>
+                                </div>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Musician</h3>
+                                <h4 class="text-xs text-white/50 font-light">Bangladesh Television (BTV)</h4>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Performed acoustic sessions on live national broadcasting networks, collaborating with performance art squads on various televised projects.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -351,22 +493,180 @@
             </div>
         </section>
 
-        <!-- 3. PROJECTS SECTION (Includes Fully Functional Sandbox Widget) -->
-        <section id="projects" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
+        <!-- 3. PROJECTS SECTION -->
+        <section id="projects" class="py-20 sm:py-32 bg-[#040608] border-t border-white/5 px-4 sm:px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-6xl mx-auto space-y-16">
+                
+                <div class="text-center space-y-4">
+                    <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">STEM & INITIATIVE DEPOT</span>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Featured Projects</h2>
+                    <p class="text-xs text-white/40 max-w-lg mx-auto font-light leading-relaxed">
+                        Exploratory vector channels, community development parameters, and digital learning assets developed to advance mathematical and scientific literacy.
+                    </p>
+                </div>
+
+                <!-- Projects Dynamic Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Card 1: Science For Champs -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <div class="space-y-4">
+                            <!-- Placeholder visual -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                                <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🔬</span>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Social Impact</span>
+                                <span class="text-xs text-white/20 font-mono">[01]</span>
+                            </div>
+                            <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">Science For Champs</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                A hands-on STEM outreach program delivering interactive experiments, engaging physical science stories, and practical lessons to children in underprivileged communities.
+                            </p>
+                        </div>
+                        <div class="pt-6 border-t border-white/5 mt-6 text-[10px] font-mono text-white/30 flex justify-between">
+                            <span>COMMUNITY OUTREACH</span>
+                            <span class="text-primaryCyan">ACTIVE_NODE</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: BigganAdda -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <div class="space-y-4">
+                            <!-- Placeholder visual -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                                <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🎙️</span>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,184,166,0.03)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Communication</span>
+                                <span class="text-xs text-white/20 font-mono">[02]</span>
+                            </div>
+                            <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">BigganAdda</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                A popular science podcast connecting young minds with dynamic researchers, global educators, and innovators to share discussions on STEM pathways and regional breakthroughs.
+                            </p>
+                        </div>
+                        <div class="pt-6 border-t border-white/5 mt-6 text-[10px] font-mono text-white/30 flex justify-between">
+                            <span>PODCAST & DISCUSSION</span>
+                            <span class="text-secondaryTeal">STABLE_STREAM</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Byte Camp -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <div class="space-y-4">
+                            <!-- Placeholder visual -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                                <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">💻</span>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Technology</span>
+                                <span class="text-xs text-white/20 font-mono">[03]</span>
+                            </div>
+                            <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">Byte Camp</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                An intensive coding bootcamp that models algorithmic thinking, structural systems logic, and coding foundations using dynamic, practical exercises.
+                            </p>
+                        </div>
+                        <div class="pt-6 border-t border-white/5 mt-6 text-[10px] font-mono text-white/30 flex justify-between">
+                            <span>ALGORITHMIC DESIGN</span>
+                            <span class="text-primaryCyan">BOOT_READY</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Bigganmona Webinar -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <div class="space-y-4">
+                            <!-- Placeholder visual -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                                <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🌐</span>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,184,166,0.03)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Web Portal</span>
+                                <span class="text-xs text-white/20 font-mono">[04]</span>
+                            </div>
+                            <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">Bigganmona Webinar</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                An active digital training portal bringing industrial engineers, academic scientists, and startup founders together with young students for career pathways and artificial intelligence guidance.
+                            </p>
+                        </div>
+                        <div class="pt-6 border-t border-white/5 mt-6 text-[10px] font-mono text-white/30 flex justify-between">
+                            <span>VIRTUAL ACADEMY</span>
+                            <span class="text-secondaryTeal">BROADCASTING</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Knowledge Camp -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <div class="space-y-4">
+                            <!-- Placeholder visual -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                                <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">📚</span>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Research</span>
+                                <span class="text-xs text-white/20 font-mono">[05]</span>
+                            </div>
+                            <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">Knowledge Camp</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                An intense academic research incubator introducing young scholars to methodology steps, systemic scientific writing, and independent publishing protocols.
+                            </p>
+                        </div>
+                        <div class="pt-6 border-t border-white/5 mt-6 text-[10px] font-mono text-white/30 flex justify-between">
+                            <span>ACADEMIC PIPELINE</span>
+                            <span class="text-primaryCyan">INTEGRATED</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: SciNerds Quiz -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <div class="space-y-4">
+                            <!-- Placeholder visual -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                                <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🏆</span>
+                                <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,184,166,0.03)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Olympiad</span>
+                                <span class="text-xs text-white/20 font-mono">[06]</span>
+                            </div>
+                            <h4 class="font-wide text-xs text-white tracking-wider uppercase leading-snug">SciNerds Quiz</h4>
+                            <p class="text-xs text-white/40 leading-relaxed font-light">
+                                A high-stakes, competitive scientific Olympiad designed to test critical logic models, dynamic chemistry bounds, and core physics parameters among students.
+                            </p>
+                        </div>
+                        <div class="pt-6 border-t border-white/5 mt-6 text-[10px] font-mono text-white/30 flex justify-between">
+                            <span>INTERDISCIPLINARY</span>
+                            <span class="text-secondaryTeal">DEPLOYED</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. PHYSICS SANDBOX SECTION -->
+        <section id="sandbox" class="py-20 sm:py-32 bg-[#040608] border-t border-white/5 px-4 sm:px-6 lg:px-16 section-anchor relative">
             <div class="max-w-6xl mx-auto space-y-16">
                 
                 <div class="text-center space-y-4">
                     <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">ACTIVE TESTING CONTAINER</span>
-                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Interactive Research Labs</h2>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Simulation Laboratory</h2>
                     <p class="text-xs text-white/40 max-w-lg mx-auto font-light leading-relaxed">
                         Experiment directly with electrostatic concepts. Select your charge sign below, then click on the testing coordinate matrix to place vector sources and track electric field lines in real time.
                     </p>
                 </div>
 
                 <!-- Live Computational Laboratory Panel -->
-                <div class="glass-hud p-6 rounded-2xl max-w-4xl mx-auto space-y-6">
+                <div class="glass-hud p-4 sm:p-6 rounded-2xl max-w-4xl mx-auto space-y-6">
                     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
-                        <div class="flex gap-4 items-center">
+                        <div class="flex flex-wrap gap-4 items-center">
                             <span class="text-[9px] font-wide text-white/50 tracking-wider">ACTIVE SIGN:</span>
                             <div class="flex gap-2">
                                 <button id="pos-charge-select" class="px-3 py-2 bg-primaryCyan/20 border border-primaryCyan/40 text-primaryCyan text-[8px] font-wide uppercase tracking-wider transition-all">
@@ -377,28 +677,87 @@
                                 </button>
                             </div>
                         </div>
-                        <button id="clear-charge-nodes" class="px-3 py-2 border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 transition-colors text-[8px] text-red-400 font-wide uppercase tracking-wider">
+                        <button id="clear-charge-nodes" class="px-3 py-2 border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 transition-colors text-[8px] text-red-400 font-wide uppercase tracking-wider w-full sm:w-auto text-center">
                             [ RESET GRID SCHEMATIC ]
                         </button>
                     </div>
 
-                    <!-- Sandbox Vector Canvas -->
-                    <div class="relative w-full aspect-[21/9] bg-[#020306] rounded-xl overflow-hidden border border-white/5">
-                        <canvas id="field-simulation-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                    <!-- Sandbox Vector Canvas (Responsive aspect limits) -->
+                    <div class="relative w-full aspect-[4/3] sm:aspect-[21/9] bg-[#020306] rounded-xl overflow-hidden border border-white/5">
+                        <canvas id="field-simulation-canvas" class="w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute bottom-3 left-3 bg-[#040608]/90 px-3 py-1.5 rounded border border-white/10 pointer-events-none">
                             <span id="coord-readout" class="text-[9px] font-mono text-white/40 block">COORDS: X: 0.00 Y: 0.00</span>
                         </div>
                     </div>
 
-                    <div class="flex justify-between text-[10px] font-mono text-white/30">
+                    <div class="flex flex-col sm:flex-row justify-between gap-2 text-[10px] font-mono text-white/30 text-center sm:text-left">
                         <span>INTEGRATION: ACTIVE (TRACE CONTRAST V1.02)</span>
                         <span>E = Σ (k·q_i / r_i²) r̂_i</span>
                     </div>
                 </div>
 
+            </div>
+        </section>
+
+        <!-- 5. BOOKS & RESEARCH SECTION -->
+        <section id="books" class="py-20 sm:py-32 bg-[#040608] border-t border-white/5 px-4 sm:px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-5xl mx-auto space-y-16">
+                
+                <div class="space-y-4 text-center sm:text-left">
+                    <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">Published Literature & Papers</span>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Science Literature</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- Book Card 1 -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col sm:flex-row gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                        <!-- Abstract book model vector -->
+                        <div class="w-full sm:w-1/3 aspect-[3/4] bg-gradient-to-br from-primaryCyan/10 to-cyan-950/20 rounded-xl flex flex-col justify-between p-4 border border-white/5 relative overflow-hidden">
+                            <span class="text-[8px] font-mono tracking-widest text-primaryCyan uppercase block font-bold">ROKOMARI BESTSELLER</span>
+                            <div class="w-full text-center py-4 text-3xl">⚡</div>
+                            <span class="text-[8px] text-white/40 block text-right font-mono">S. U. NAHIAN</span>
+                        </div>
+
+                        <div class="w-full sm:w-2/3 flex flex-col justify-between py-1">
+                            <div class="space-y-3">
+                                <span class="text-[9px] font-mono tracking-wider bg-primaryCyan/10 text-primaryCyan px-2.5 py-0.5 rounded uppercase">SSC level</span>
+                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Mojar Torit (মজার তড়িৎ)</h3>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    An essential introduction designed to make electrodynamics and electric capacitor concepts thoroughly digestible for junior secondary pupils with fun illustrations and proofs. Published in 2022.
+                                </p>
+                            </div>
+                            <button onclick="openBookModal('Mojar Torit', 'Publisher: Rokomari Publications<br>Focus: Secondary Class 9-10 Electrodynamics', 'Written and compiled by Sabid Uddin Nahian in 2022. It is configured specifically to present classical circuitry equations, electrostatics potentials, and energy vector variables in a highly readable and intuitive format for high school physics pupils.')" class="mt-4 sm:mt-0 text-left text-xs font-mono text-primaryCyan hover:underline block relative z-20">
+                                COGNITIVE SCAN →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Book Card 2 -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col sm:flex-row gap-6 opacity-60 hover:opacity-100 transition-all duration-300">
+                        <div class="w-full sm:w-1/3 aspect-[3/4] bg-white/5 rounded-xl flex flex-col justify-between p-4 border border-white/5 relative overflow-hidden">
+                            <span class="text-[8px] font-mono tracking-widest text-white/30 uppercase block font-bold">IN DEVELOPMENT</span>
+                            <div class="w-full text-center py-4 text-3xl text-white/10">⚛</div>
+                            <span class="text-[8px] text-white/20 block text-right font-mono">S. U. NAHIAN</span>
+                        </div>
+
+                        <div class="w-full sm:w-2/3 flex flex-col justify-between py-1">
+                            <div class="space-y-3">
+                                <span class="text-[9px] font-mono tracking-wider bg-white/5 px-2.5 py-0.5 rounded text-white/40 uppercase">MANUSCRIPT</span>
+                                <h3 class="font-wide text-sm md:text-base text-white/80 uppercase tracking-wider">Potential Theory Dynamics</h3>
+                                <p class="text-xs text-white/40 leading-relaxed font-light">
+                                    Comprehensive guide compiling complex vector equations and physical limits for secondary classes.
+                                </p>
+                            </div>
+                            <span class="text-xs font-mono text-white/20">STATUS: PEER REVIEW</span>
+                        </div>
+                    </div>
+
+                </div>
+
                 <!-- Academic Research Papers -->
                 <div class="pt-16 space-y-8">
-                    <h3 class="font-wide text-xs text-white/80 uppercase tracking-widest">Theoretical Physics Manuscripts</h3>
+                    <h3 class="font-wide text-xs text-white/80 uppercase tracking-widest text-center sm:text-left">Theoretical Physics Manuscripts</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         
                         <!-- Paper 1 -->
@@ -461,73 +820,14 @@
             </div>
         </section>
 
-        <!-- 4. BOOKS SECTION (Published Literature & Educational Textbook) -->
-        <section id="books" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
-            <div class="max-w-4xl mx-auto space-y-16">
-                
-                <div class="space-y-4">
-                    <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">Published Textbooks</span>
-                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Science Literature</h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    
-                    <!-- Book Card 1 -->
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col sm:flex-row gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
-                        <!-- Abstract book model vector -->
-                        <div class="w-full sm:w-1/3 aspect-[3/4] bg-gradient-to-br from-primaryCyan/10 to-cyan-950/20 rounded-xl flex flex-col justify-between p-4 border border-white/5 relative overflow-hidden">
-                            <span class="text-[8px] font-mono tracking-widest text-primaryCyan uppercase block font-bold">ROKOMARI BESTSELLER</span>
-                            <div class="w-full text-center py-4 text-3xl">⚡</div>
-                            <span class="text-[8px] text-white/40 block text-right font-mono">S. U. NAHIAN</span>
-                        </div>
-
-                        <div class="w-full sm:w-2/3 flex flex-col justify-between py-1">
-                            <div class="space-y-3">
-                                <span class="text-[9px] font-mono tracking-wider bg-primaryCyan/10 text-primaryCyan px-2.5 py-0.5 rounded uppercase">SSC level</span>
-                                <h3 class="font-wide text-sm md:text-base text-white uppercase tracking-wider">Mojar Torit (মজার তড়িৎ)</h3>
-                                <p class="text-xs text-white/40 leading-relaxed font-light">
-                                    An essential introduction designed to make electrodynamics and electric capacitor concepts thoroughly digestible for junior secondary pupils with fun illustrations and proofs. Published in 2022.
-                                </p>
-                            </div>
-                            <button onclick="openBookModal('Mojar Torit', 'Publisher: Rokomari Publications<br>Focus: Secondary Class 9-10 Electrodynamics', 'Written and compiled by Sabid Uddin Nahian in 2022. It is configured specifically to present classical circuitry equations, electrostatics potentials, and energy vector variables in a highly readable and intuitive format for high school physics pupils.')" class="mt-4 sm:mt-0 text-left text-xs font-mono text-primaryCyan hover:underline block relative z-20">
-                                COGNITIVE SCAN →
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Book Card 2 (Pending stage) -->
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col sm:flex-row gap-6 opacity-50 hover:opacity-100 transition-all duration-300">
-                        <div class="w-full sm:w-1/3 aspect-[3/4] bg-white/5 rounded-xl flex flex-col justify-between p-4 border border-white/5 relative overflow-hidden">
-                            <span class="text-[8px] font-mono tracking-widest text-white/30 uppercase block font-bold">IN DEVELOPMENT</span>
-                            <div class="w-full text-center py-4 text-3xl text-white/10">⚛</div>
-                            <span class="text-[8px] text-white/20 block text-right font-mono">S. U. NAHIAN</span>
-                        </div>
-
-                        <div class="w-full sm:w-2/3 flex flex-col justify-between py-1">
-                            <div class="space-y-3">
-                                <span class="text-[9px] font-mono tracking-wider bg-white/5 px-2.5 py-0.5 rounded text-white/40 uppercase">MANUSCRIPT</span>
-                                <h3 class="font-wide text-sm md:text-base text-white/80 uppercase tracking-wider">Potential Theory Dynamics</h3>
-                                <p class="text-xs text-white/40 leading-relaxed font-light">
-                                    Comprehensive guide compiling complex vector equations and physical limits for secondary classes.
-                                </p>
-                            </div>
-                            <span class="text-xs font-mono text-white/20">STATUS: PEER REVIEW</span>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-        </section>
-
-        <!-- 5. CONTACT SECTION -->
-        <section id="contact" class="py-32 bg-[#040608] border-t border-white/5 px-6 lg:px-16 section-anchor relative">
-            <div class="max-w-4xl mx-auto glass-hud rounded-3xl p-8 md:p-12 relative overflow-hidden">
+        <!-- 6. CONTACT SECTION -->
+        <section id="contact" class="py-20 sm:py-32 bg-[#040608] border-t border-white/5 px-4 sm:px-6 lg:px-16 section-anchor relative">
+            <div class="max-w-4xl mx-auto glass-hud rounded-3xl p-6 sm:p-8 md:p-12 relative overflow-hidden">
                 <div class="space-y-8 relative z-10">
                     
                     <div class="space-y-3">
                         <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">TRANSMISSION LINK</span>
-                        <h2 class="font-wide text-3xl uppercase tracking-wider text-white">Let's Inspire the Next Generation.</h2>
+                        <h2 class="font-wide text-2xl sm:text-3xl uppercase tracking-wider text-white">Let's Inspire the Next Generation.</h2>
                         <p class="text-xs text-white/40 max-w-xl font-light leading-relaxed">
                             Connect with Sabid Uddin Nahian regarding textbook designs, physics education curricula, or science outreach programs.
                         </p>
@@ -536,19 +836,19 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
                         <div class="space-y-1">
                             <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">Email Channel</span>
-                            <a href="mailto:uddinsabid5@gmail.com" class="text-xs font-mono text-primaryCyan hover:underline block">uddinsabid5@gmail.com</a>
+                            <a href="mailto:uddinsabid5@gmail.com" class="text-xs sm:text-sm font-mono text-primaryCyan hover:underline block break-all">uddinsabid5@gmail.com</a>
                         </div>
                         <div class="space-y-1">
                             <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">Scientific Blog</span>
-                            <a href="https://sabiduddin.blogspot.com/" target="_blank" class="text-xs font-mono text-secondaryTeal hover:underline block">sabiduddin.blogspot.com ↗</a>
+                            <a href="https://sabiduddin.blogspot.com/" target="_blank" class="text-xs sm:text-sm font-mono text-secondaryTeal hover:underline block break-all">sabiduddin.blogspot.com ↗</a>
                         </div>
                         <div class="space-y-1">
                             <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">LinkedIn Index</span>
-                            <a href="https://www.linkedin.com/in/sabid-uddin-nahian-4437a61ba/" target="_blank" class="text-xs font-mono text-white/80 hover:underline block">sabid-uddin-nahian-4437a61ba ↗</a>
+                            <a href="https://www.linkedin.com/in/sabid-uddin-nahian-4437a61ba/" target="_blank" class="text-xs sm:text-sm font-mono text-white/80 hover:underline block break-all">sabid-uddin-nahian-4437a61ba ↗</a>
                         </div>
                         <div class="space-y-1">
                             <span class="text-[10px] font-mono text-white/30 tracking-widest block uppercase">Scientific Platform</span>
-                            <span class="text-xs font-mono text-white/50 block">Chairman @ Bigganmona</span>
+                            <span class="text-xs sm:text-sm font-mono text-white/50 block">Chairman @ Bigganmona</span>
                         </div>
                     </div>
 
@@ -567,24 +867,24 @@
     </main>
 
     <!-- Radar Book Details Modal Frame -->
-    <div id="book-modal" class="fixed inset-0 z-50 bg-[#040608]/90 backdrop-blur-xl hidden flex items-center justify-center p-6 transition-all duration-300 opacity-0">
+    <div id="book-modal" class="fixed inset-0 z-50 bg-[#040608]/95 backdrop-blur-xl hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300 opacity-0">
         <div class="glass-hud max-w-lg w-full rounded-2xl p-6 md:p-8 space-y-6 relative">
             <button onclick="closeBookModal()" class="absolute top-4 right-4 text-white/30 hover:text-white font-mono text-xs uppercase tracking-wider">[ Close Esc ]</button>
             
             <div class="space-y-2">
                 <span id="modal-meta" class="text-[10px] font-mono text-primaryCyan uppercase tracking-widest block"></span>
-                <h3 id="modal-title" class="font-wide text-lg text-white uppercase"></h3>
+                <h3 id="modal-title" class="font-wide text-base sm:text-lg text-white uppercase"></h3>
             </div>
             
             <div class="border-t border-white/5 pt-4">
-                <p id="modal-desc" class="text-xs text-white/50 leading-relaxed font-light"></p>
+                <p id="modal-desc" class="text-xs text-white/50 leading-relaxed font-light max-h-60 overflow-y-auto scrollbar-none"></p>
             </div>
 
-            <div class="flex gap-4 pt-2">
-                <a href="https://www.rokomari.com/" target="_blank" class="px-5 py-2.5 bg-primaryCyan text-cosmicBg font-wide text-[9px] tracking-wider rounded uppercase font-bold hover:bg-white transition-colors">
+            <div class="flex flex-wrap gap-4 pt-2">
+                <a href="https://www.rokomari.com/" target="_blank" class="px-5 py-2.5 bg-primaryCyan text-cosmicBg font-wide text-[9px] tracking-wider rounded uppercase font-bold hover:bg-white transition-colors text-center">
                     Acquire Textbook
                 </a>
-                <button onclick="closeBookModal()" class="px-5 py-2.5 border border-white/10 text-white font-wide text-[9px] tracking-wider rounded uppercase hover:border-white/30 transition-colors">
+                <button onclick="closeBookModal()" class="px-5 py-2.5 border border-white/10 text-white font-wide text-[9px] tracking-wider rounded uppercase hover:border-white/30 transition-colors text-center">
                     Terminate Scan
                 </button>
             </div>
@@ -593,7 +893,17 @@
 
     <!-- SCRIPT INFRASTRUCTURE -->
     <script>
-        // High-performance Parallax Background Canvas
+        // Programmatic Injection of Bottom-Left and Top-Right Brackets into Glass HUD modules
+        document.querySelectorAll('.glass-hud').forEach(hud => {
+            const tr = document.createElement('div');
+            tr.className = 'corner-tr';
+            const bl = document.createElement('div');
+            bl.className = 'corner-bl';
+            hud.appendChild(tr);
+            hud.appendChild(bl);
+        });
+
+        // High-performance Parallax Background Canvas with Constellations & Nebulas
         const pCanvas = document.getElementById('parallax-canvas');
         const pCtx = pCanvas.getContext('2d');
         let pWidth, pHeight;
@@ -605,8 +915,10 @@
         window.addEventListener('resize', resizeParallax);
         resizeParallax();
 
+        // Star Count adjustments depending on computing limits of portable layouts
+        const maxDustCount = window.innerWidth < 768 ? 35 : 75;
         const celestialDust = [];
-        for (let i = 0; i < 65; i++) {
+        for (let i = 0; i < maxDustCount; i++) {
             celestialDust.push({
                 x: Math.random() * pWidth,
                 y: Math.random() * pHeight,
@@ -617,29 +929,95 @@
             });
         }
 
+        // Active drifting nebulas
+        const nebulas = [
+            { x: pWidth * 0.25, y: pHeight * 0.3, radius: 250, color: 'rgba(0, 229, 255, 0.035)', speedX: 0.1, speedY: 0.05 },
+            { x: pWidth * 0.75, y: pHeight * 0.7, radius: 300, color: 'rgba(20, 184, 166, 0.025)', speedX: -0.05, speedY: 0.08 }
+        ];
+
+        // Active random comets (Shooting Stars)
+        const shootingStars = [];
+        function spawnShootingStar() {
+            if (shootingStars.length < 2 && Math.random() < 0.008) {
+                shootingStars.push({
+                    x: Math.random() * pWidth,
+                    y: Math.random() * (pHeight * 0.5),
+                    len: Math.random() * 80 + 40,
+                    speed: Math.random() * 12 + 8,
+                    angle: Math.PI / 6 + Math.random() * (Math.PI / 12),
+                    opacity: 1
+                });
+            }
+        }
+
+        // Interactivity drifting variables
+        let mouseDriftX = 0, mouseDriftY = 0;
+        let targetDriftX = 0, targetDriftY = 0;
+        window.addEventListener('mousemove', (e) => {
+            targetDriftX = (e.clientX - window.innerWidth / 2) * 0.03;
+            targetDriftY = (e.clientY - window.innerHeight / 2) * 0.03;
+        });
+
         function animateParallax() {
             pCtx.fillStyle = '#040608';
             pCtx.fillRect(0, 0, pWidth, pHeight);
 
-            // Draw Parallax coordinates grids
-            pCtx.strokeStyle = 'rgba(0, 229, 255, 0.02)';
+            // Interpolate mouse parallax drift smooth parameters
+            mouseDriftX += (targetDriftX - mouseDriftX) * 0.1;
+            mouseDriftY += (targetDriftY - mouseDriftY) * 0.1;
+
+            // Draw fading cosmic nebulas
+            nebulas.forEach(n => {
+                n.x += n.speedX;
+                n.y += n.speedY;
+                if (n.x < -n.radius) n.x = pWidth + n.radius;
+                if (n.x > pWidth + n.radius) n.x = -n.radius;
+                if (n.y < -n.radius) n.y = pHeight + n.radius;
+                if (n.y > pHeight + n.radius) n.y = -n.radius;
+
+                let grad = pCtx.createRadialGradient(n.x + mouseDriftX * 0.5, n.y + mouseDriftY * 0.5, 0, n.x + mouseDriftX * 0.5, n.y + mouseDriftY * 0.5, n.radius);
+                grad.addColorStop(0, n.color);
+                grad.addColorStop(1, 'transparent');
+                pCtx.fillStyle = grad;
+                pCtx.beginPath();
+                pCtx.arc(n.x + mouseDriftX * 0.5, n.y + mouseDriftY * 0.5, n.radius, 0, Math.PI * 2);
+                pCtx.fill();
+            });
+
+            // Draw coordinate grid layers
+            pCtx.strokeStyle = 'rgba(0, 229, 255, 0.015)';
             pCtx.lineWidth = 1;
             const gridSpacing = 60;
-            
-            // Adjust coordinates based on scroll distance to mock infinite grid
             const scrollOffset = window.pageYOffset * 0.15;
             
             for (let x = 0; x < pWidth; x += gridSpacing) {
                 pCtx.beginPath();
-                pCtx.moveTo(x, 0);
-                pCtx.lineTo(x, pHeight);
+                pCtx.moveTo(x + mouseDriftX * 0.2, 0);
+                pCtx.lineTo(x + mouseDriftX * 0.2, pHeight);
                 pCtx.stroke();
             }
             for (let y = -gridSpacing; y < pHeight + gridSpacing; y += gridSpacing) {
                 pCtx.beginPath();
-                pCtx.moveTo(0, y - (scrollOffset % gridSpacing));
-                pCtx.lineTo(pWidth, y - (scrollOffset % gridSpacing));
+                pCtx.moveTo(0, y - (scrollOffset % gridSpacing) + mouseDriftY * 0.2);
+                pCtx.lineTo(pWidth, y - (scrollOffset % gridSpacing) + mouseDriftY * 0.2);
                 pCtx.stroke();
+            }
+
+            // Draw celestial constellation links
+            for (let i = 0; i < celestialDust.length; i++) {
+                for (let j = i + 1; j < celestialDust.length; j++) {
+                    let dx = (celestialDust[i].x + mouseDriftX) - (celestialDust[j].x + mouseDriftX);
+                    let dy = (celestialDust[i].y + mouseDriftY) - (celestialDust[j].y + mouseDriftY);
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 80) {
+                        pCtx.strokeStyle = `rgba(0, 229, 255, ${(1 - dist/80) * 0.045})`;
+                        pCtx.lineWidth = 0.5;
+                        pCtx.beginPath();
+                        pCtx.moveTo(celestialDust[i].x + mouseDriftX, celestialDust[i].y + mouseDriftY);
+                        pCtx.lineTo(celestialDust[j].x + mouseDriftX, celestialDust[j].y + mouseDriftY);
+                        pCtx.stroke();
+                    }
+                }
             }
 
             // Draw celestial dust particles
@@ -652,10 +1030,31 @@
                 d.alpha += d.fade;
                 if (d.alpha > 0.85 || d.alpha < 0.15) d.fade = -d.fade;
 
-                pCtx.fillStyle = `rgba(0, 229, 255, ${d.alpha * 0.25})`;
+                pCtx.fillStyle = `rgba(0, 229, 255, ${d.alpha * 0.2})`;
                 pCtx.beginPath();
-                pCtx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+                pCtx.arc(d.x + mouseDriftX, d.y + mouseDriftY, d.size, 0, Math.PI * 2);
                 pCtx.fill();
+            });
+
+            // Animate shooting comets
+            spawnShootingStar();
+            shootingStars.forEach((s, idx) => {
+                s.x += Math.cos(s.angle) * s.speed;
+                s.y += Math.sin(s.angle) * s.speed;
+                s.opacity -= 0.015;
+                if (s.opacity <= 0 || s.x > pWidth || s.y > pHeight) {
+                    shootingStars.splice(idx, 1);
+                    return;
+                }
+                let grad = pCtx.createLinearGradient(s.x, s.y, s.x - Math.cos(s.angle) * s.len, s.y - Math.sin(s.angle) * s.len);
+                grad.addColorStop(0, `rgba(0, 229, 255, ${s.opacity})`);
+                grad.addColorStop(1, 'transparent');
+                pCtx.strokeStyle = grad;
+                pCtx.lineWidth = 1.5;
+                pCtx.beginPath();
+                pCtx.moveTo(s.x, s.y);
+                pCtx.lineTo(s.x - Math.cos(s.angle) * s.len, s.y - Math.sin(s.angle) * s.len);
+                pCtx.stroke();
             });
 
             requestAnimationFrame(animateParallax);
@@ -673,6 +1072,7 @@
         let chargedNodes = [];
 
         function resizeSandbox() {
+            if (!simCanvas) return;
             const rect = simCanvas.parentNode.getBoundingClientRect();
             simWidth = simCanvas.width = rect.width;
             simHeight = simCanvas.height = rect.height;
@@ -681,6 +1081,16 @@
         window.addEventListener('resize', resizeSandbox);
         setTimeout(resizeSandbox, 100);
 
+        // Core physics input mapper function
+        function handleChargeInsertion(clientX, clientY) {
+            const rect = simCanvas.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            chargedNodes.push({ x, y, q: selectedChargeType });
+            drawSandbox();
+        }
+
+        // Mouse Listeners
         simCanvas.addEventListener('mousemove', (e) => {
             const rect = simCanvas.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width * 10 - 5).toFixed(2);
@@ -689,12 +1099,28 @@
         });
 
         simCanvas.addEventListener('mousedown', (e) => {
-            const rect = simCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            chargedNodes.push({ x, y, q: selectedChargeType });
-            drawSandbox();
+            handleChargeInsertion(e.clientX, e.clientY);
         });
+
+        // Responsive Touch Screen Listeners for mobile/tablet coordinates
+        simCanvas.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches[0]) {
+                e.preventDefault(); // Stop page from scrolling when interacting with laboratory simulation grid
+                handleChargeInsertion(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: false });
+
+        simCanvas.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches[0]) {
+                e.preventDefault();
+                const rect = simCanvas.getBoundingClientRect();
+                const clientX = e.touches[0].clientX;
+                const clientY = e.touches[0].clientY;
+                const x = ((clientX - rect.left) / rect.width * 10 - 5).toFixed(2);
+                const y = (-(clientY - rect.top) / rect.height * 10 + 5).toFixed(2);
+                document.getElementById('coord-readout').innerText = `COORDS: X: ${x} Y: ${y}`;
+            }
+        }, { passive: false });
 
         const posSelect = document.getElementById('pos-charge-select');
         const negSelect = document.getElementById('neg-charge-select');
@@ -834,8 +1260,12 @@
         const sections = document.querySelectorAll('.section-anchor');
 
         function positionIndicator(link) {
+            if (!indicator || !link) return;
             indicator.style.width = `${link.offsetWidth}px`;
             indicator.style.left = `${link.offsetLeft}px`;
+            
+            // Auto-scroll inside navbar capsule if item is positioned off-screen
+            link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
 
         navLinks.forEach(link => {
@@ -849,11 +1279,17 @@
             });
         });
 
+        // Re-evaluate indicator bounds during screen resizing or tablet rotations
+        window.addEventListener('resize', () => {
+            const activeLink = document.querySelector('.nav-link.text-white');
+            if (activeLink) positionIndicator(activeLink);
+        });
+
         window.addEventListener('scroll', () => {
             let current = '';
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
-                if (pageYOffset >= sectionTop - 180) {
+                if (pageYOffset >= sectionTop - 220) {
                     current = section.getAttribute('id');
                 }
             });
@@ -887,10 +1323,12 @@
                 setTimeout(() => {
                     loader.style.display = 'none';
                     resizeSandbox(); // Synchronize laboratory sandbox canvas dimension metrics
+                    const activeLink = document.querySelector('.nav-link.text-white');
+                    if (activeLink) positionIndicator(activeLink);
                 }, 1000);
             }
-            pBar.style.width = `${progress}%`;
-            pText.innerText = `${progress.toFixed(2)}%`;
+            if (pBar) pBar.style.width = `${progress}%`;
+            if (pText) pText.innerText = `${progress.toFixed(2)}%`;
         }, 100);
 
         // Books detail modal actions
