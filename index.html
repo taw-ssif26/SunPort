@@ -435,10 +435,13 @@
                             <span class="w-1.5 h-1.5 bg-white/20 rounded-full"></span>
                         </span>
                         <div class="glass-hud p-6 md:p-8 rounded-xl grid grid-cols-1 md:grid-cols-12 gap-6 glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
-                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-primaryCyan/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group">
-                                <img src="assets/bncc.jpeg" alt="BNCC Crest" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300">
+                            
+                            <!-- Image Container with object-contain & padding to show full image -->
+                            <div class="md:col-span-3 flex items-center justify-center bg-gradient-to-br from-primaryCyan/10 to-transparent border border-white/5 rounded-lg h-32 relative overflow-hidden group p-3">
+                                <img src="assets/bncc.jpeg" alt="BNCC Crest" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
                                 <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,229,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none"></div>
                             </div>
+                    
                             <div class="md:col-span-9 space-y-4">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
                                     <span class="text-[10px] font-wide text-white/40 tracking-wider uppercase">March 2018 — January 2022</span>
