@@ -670,33 +670,47 @@
             <div class="max-w-6xl mx-auto space-y-16">
                 <div class="text-center space-y-4">
                     <span class="text-[9px] font-wide text-primaryCyan tracking-[0.4em] uppercase block">ACTIVE TESTING CONTAINER</span>
-                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Simulation Laboratory</h2>
-                    <p class="text-xs text-white/40 max-w-lg mx-auto font-light leading-relaxed">Experiment directly with electrostatic concepts. Select your charge sign below, then tap the testing coordinate matrix to place vector sources and track electric field lines in real time.</p>
+                    <h2 class="font-wide text-2xl md:text-3xl uppercase tracking-wider text-white">Interactive Engine Simulation</h2>
+                    <p class="text-xs text-white/40 max-w-lg mx-auto font-light leading-relaxed">Select a propulsion category and choose an engine to inspect its kinematic layout. Adjust the throttle controller below to track mechanical speed variations and thermal vector cycles in real time.</p>
                 </div>
 
                 <div class="glass-hud p-4 sm:p-6 rounded-2xl max-w-4xl mx-auto space-y-6">
-                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
-                        <div class="flex flex-wrap gap-4 items-center">
-                            <span class="text-[9px] font-wide text-white/50 tracking-wider">ACTIVE SIGN:</span>
-                            <div class="flex gap-2">
-                                <button id="pos-charge-select" class="px-3 py-2 bg-primaryCyan/20 border border-primaryCyan/40 text-primaryCyan text-[8px] font-wide uppercase tracking-wider transition-all">[ + ] Positive</button>
-                                <button id="neg-charge-select" class="px-3 py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-wide uppercase tracking-wider transition-all">[ - ] Negative</button>
-                            </div>
+                    
+                    <!-- Category Select and Dynamic Selection Grid -->
+                    <div class="flex flex-col gap-4 border-b border-white/5 pb-4">
+                        <div class="flex flex-wrap justify-center gap-2">
+                            <button id="cat-piston" class="cat-btn px-4 py-2 bg-primaryCyan/25 border border-primaryCyan text-primaryCyan text-[9px] font-wide uppercase tracking-wider transition-all">Piston Engines</button>
+                            <button id="cat-rocket" class="cat-btn px-4 py-2 bg-white/5 border border-white/10 text-white/50 text-[9px] font-wide uppercase tracking-wider transition-all">Rocket Propulsion</button>
+                            <button id="cat-jet" class="cat-btn px-4 py-2 bg-white/5 border border-white/10 text-white/50 text-[9px] font-wide uppercase tracking-wider transition-all">Jet Turbine/Aero</button>
                         </div>
-                        <button id="clear-charge-nodes" class="px-3 py-2 border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 transition-colors text-[8px] text-red-400 font-wide uppercase tracking-wider w-full sm:w-auto text-center">[ RESET GRID SCHEMATIC ]</button>
+                        <div id="engine-select-grid" class="flex flex-wrap justify-center gap-1.5 py-2">
+                            <!-- Populated dynamically via JS -->
+                        </div>
                     </div>
 
+                    <!-- Interactive Simulation Canvas -->
                     <div class="relative w-full aspect-[4/3] bg-[#020306] rounded-xl overflow-hidden border border-white/5">
                         <canvas id="field-simulation-canvas" class="w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute bottom-3 left-3 bg-[#040608]/90 px-3 py-1.5 rounded border border-white/10 pointer-events-none">
-                            <span id="coord-readout" class="text-[9px] font-mono text-white/40 block">COORDS: X: 0.00 Y: 0.00</span>
+                            <span id="coord-readout" class="text-[9px] font-mono text-white/40 block">METRICS: INITIALIZING THERMAL ARRAY...</span>
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row justify-between gap-2 text-[10px] font-mono text-white/30 text-center sm:text-left">
-                        <span>INTEGRATION: ACTIVE (TRACE CONTRAST V1.02)</span>
-                        <span>E = Σ (k·q_i / r_i²) r̂_i</span>
+                    <!-- Live Metrics and Descriptions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-white/50">
+                                <span>THROTTLE LEVEL</span>
+                                <span id="throttle-val">80%</span>
+                            </div>
+                            <input type="range" id="sim-throttle" min="10" max="120" value="80" class="w-full accent-primaryCyan bg-white/10 rounded-lg appearance-none h-1 cursor-pointer">
+                        </div>
+                        <div class="space-y-1 bg-white/5 p-3.5 rounded-lg border border-white/5 text-left">
+                            <span class="text-[10px] font-wide text-primaryCyan block tracking-wider animate-pulse" id="engine-title">LOAD CONFIGURING...</span>
+                            <p class="text-[11px] text-white/40 font-light leading-relaxed" id="engine-desc">Select an engine configuration above to visualize its kinetic properties and thermal vector cycles.</p>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </section>
@@ -882,86 +896,1218 @@
         }
         animateParallax();
 
-        // SIMULATION
-        const simCanvas=document.getElementById('field-simulation-canvas');
-        const sCtx=simCanvas.getContext('2d');
-        let simWidth,simHeight,selectedChargeType=1,chargedNodes=[];
+        // ==========================================
+        // DYNAMIC VEHICLE PROPULSION SIMULATION LAB
+        // ==========================================
+        const simCanvas = document.getElementById('field-simulation-canvas');
+        const sCtx = simCanvas.getContext('2d');
+        let simWidth, simHeight;
 
-        function resizeSandbox(){
-            if(!simCanvas)return;
-            const rect=simCanvas.parentNode.getBoundingClientRect();
-            simWidth=simCanvas.width=rect.width; simHeight=simCanvas.height=rect.height; drawSandbox();
+        let currentCategory = 'piston';
+        let currentEngineId = 'i4';
+        let simThrottle = 80;
+        let simTime = 0;
+        let exhaustParticles = [];
+        let hoverX = 0, hoverY = 0, isHovering = false;
+
+        const engineData = {
+            piston: [
+                { id: 'i3', name: 'Inline 3 (I3)', desc: 'Three cylinders aligned vertically. Compact layout firing every 120 degrees.' },
+                { id: 'i4', name: 'Inline 4 (I4)', desc: 'Standard four-cylinder engine. Employs a flat-plane crankshaft firing sequentially.' },
+                { id: 'i5', name: 'Inline 5 (I5)', desc: 'An odd-cylinder design producing complex balance profiles and a distinct acoustic drone.' },
+                { id: 'i6', name: 'Inline 6 (I6)', desc: 'Inherently balanced configuration. Delivers smooth power overlap.' },
+                { id: 'v6', name: 'V6 Engine', desc: 'Six cylinders set in two angled banks (60 degrees). Combines compactness with high power density.' },
+                { id: 'v8', name: 'V8 Engine', desc: 'Classic performance layout. Angled banks at 90 degrees provide excellent balanced firing orders.' },
+                { id: 'v10', name: 'V10 Engine', desc: 'Ten cylinders arranged in a narrow bank structure. Balanced for high-end track and sport workloads.' },
+                { id: 'v12', name: 'V12 Engine', desc: 'The peak of mechanical balance. Angled banks at 60 degrees cancel secondary vibrations.' },
+                { id: 'W', name: 'W12 Engine', desc: 'W-configuration using three cylinder banks. Offers high cylinder displacement inside a short casing.' }
+            ],
+            rocket: [
+                { id: 'liquid', name: 'Liquid Rocket', desc: 'Cryogenic oxidizer and fuel pressurized via centrifugal turbopumps and injected inside nozzle chambers.' },
+                { id: 'solid', name: 'Solid Rocket Motor', desc: 'Direct, heavy rocket propulsion burning solid propellants outward from a central dynamic channel.' },
+                { id: 'hybrid', name: 'Hybrid Rocket', desc: 'Liquid oxidizer valve spraying directly onto a solid fuel grain block. Supports on/off throttle controls.' },
+                { id: 'ion', name: 'Ion Propulsion', desc: 'High-voltage grid matrices ionizing and accelerating Xenon gas streams to emit delicate thrust.' }
+            ],
+            jet: [
+                { id: 'turbojet', name: 'Turbojet', desc: 'Compresses intake air, mixes and burns fuel continuously, spinning exhaust turbine stages to thrust back.' },
+                { id: 'turbofan', name: 'Turbofan', desc: 'High-bypass turbine. A massive inlet fan channels bypass cold air around a central hot core.' },
+                { id: 'turboprop', name: 'Turboprop', desc: 'A traditional aviation propeller driven by a core turbine shaft via a reduction gear system.' },
+                { id: 'ramjet', name: 'Ramjet', desc: 'No mechanical rotating stages. compresses supersonic airflow purely using intake pressure shapes.' },
+                { id: 'scramjet', name: 'Scramjet', desc: 'Supersonic Combustion Ramjet. Combusts air-fuel mixtures in supersonic streams for hypersonic cruise.' }
+            ]
+        };
+
+        const categoryButtons = {
+            piston: document.getElementById('cat-piston'),
+            rocket: document.getElementById('cat-rocket'),
+            jet: document.getElementById('cat-jet')
+        };
+        const selectGrid = document.getElementById('engine-select-grid');
+        const throttleSlider = document.getElementById('sim-throttle');
+        const throttleVal = document.getElementById('throttle-val');
+        const engineTitle = document.getElementById('engine-title');
+        const engineDesc = document.getElementById('engine-desc');
+        const coordReadout = document.getElementById('coord-readout');
+
+        function resizeSandbox() {
+            if (!simCanvas) return;
+            const rect = simCanvas.parentNode.getBoundingClientRect();
+            simWidth = simCanvas.width = rect.width;
+            simHeight = simCanvas.height = rect.height;
         }
-        window.addEventListener('resize',resizeSandbox);
-        setTimeout(resizeSandbox,100);
+        window.addEventListener('resize', resizeSandbox);
+        setTimeout(resizeSandbox, 100);
 
-        function handleChargeInsertion(clientX,clientY){
-            const rect=simCanvas.getBoundingClientRect();
-            chargedNodes.push({x:clientX-rect.left,y:clientY-rect.top,q:selectedChargeType});
-            drawSandbox();
+        function populateEngineGrid(cat) {
+            selectGrid.innerHTML = '';
+            engineData[cat].forEach(eng => {
+                const btn = document.createElement('button');
+                btn.className = `px-2 py-1 rounded text-[8px] font-wide uppercase tracking-wider transition-all border ${
+                    eng.id === currentEngineId 
+                    ? 'bg-primaryCyan/20 border-primaryCyan text-primaryCyan' 
+                    : 'bg-white/5 border-white/10 text-white/40 hover:text-white/80'
+                }`;
+                btn.innerText = eng.name;
+                btn.addEventListener('click', () => {
+                    currentEngineId = eng.id;
+                    engineTitle.innerText = eng.name.toUpperCase();
+                    engineDesc.innerText = eng.desc;
+                    document.querySelectorAll('#engine-select-grid button').forEach(b => {
+                        b.className = 'px-2 py-1 rounded text-[8px] font-wide uppercase tracking-wider transition-all border bg-white/5 border-white/10 text-white/40 hover:text-white/80';
+                    });
+                    btn.className = 'px-2 py-1 rounded text-[8px] font-wide uppercase tracking-wider transition-all border bg-primaryCyan/20 border-primaryCyan text-primaryCyan';
+                    exhaustParticles = [];
+                });
+                selectGrid.appendChild(btn);
+            });
         }
 
-        simCanvas.addEventListener('mousemove',e=>{
-            const rect=simCanvas.getBoundingClientRect();
-            const x=((e.clientX-rect.left)/rect.width*10-5).toFixed(2);
-            const y=(-(e.clientY-rect.top)/rect.height*10+5).toFixed(2);
-            document.getElementById('coord-readout').innerText=`COORDS: X: ${x} Y: ${y}`;
+        Object.keys(categoryButtons).forEach(cat => {
+            categoryButtons[cat].addEventListener('click', () => {
+                currentCategory = cat;
+                Object.keys(categoryButtons).forEach(k => {
+                    categoryButtons[k].className = 'cat-btn px-4 py-2 bg-white/5 border border-white/10 text-white/50 text-[9px] font-wide uppercase tracking-wider transition-all';
+                });
+                categoryButtons[cat].className = 'cat-btn px-4 py-2 bg-primaryCyan/25 border border-primaryCyan text-primaryCyan text-[9px] font-wide uppercase tracking-wider transition-all';
+                
+                currentEngineId = engineData[cat][0].id;
+                engineTitle.innerText = engineData[cat][0].name.toUpperCase();
+                engineDesc.innerText = engineData[cat][0].desc;
+                
+                populateEngineGrid(cat);
+                exhaustParticles = [];
+            });
         });
-        simCanvas.addEventListener('mousedown',e=>handleChargeInsertion(e.clientX,e.clientY));
-        simCanvas.addEventListener('touchstart',e=>{if(e.touches&&e.touches[0]){e.preventDefault();handleChargeInsertion(e.touches[0].clientX,e.touches[0].clientY);}},{passive:false});
-        simCanvas.addEventListener('touchmove',e=>{
-            if(e.touches&&e.touches[0]){
-                e.preventDefault();
-                const rect=simCanvas.getBoundingClientRect();
-                const x=((e.touches[0].clientX-rect.left)/rect.width*10-5).toFixed(2);
-                const y=(-(e.touches[0].clientY-rect.top)/rect.height*10+5).toFixed(2);
-                document.getElementById('coord-readout').innerText=`COORDS: X: ${x} Y: ${y}`;
+
+        throttleSlider.addEventListener('input', (e) => {
+            simThrottle = parseInt(e.target.value);
+            throttleVal.innerText = `${simThrottle}%`;
+        });
+
+        simCanvas.addEventListener('mousemove', e => {
+            const rect = simCanvas.getBoundingClientRect();
+            hoverX = e.clientX - rect.left;
+            hoverY = e.clientY - rect.top;
+            isHovering = true;
+        });
+        simCanvas.addEventListener('mouseleave', () => { isHovering = false; });
+        simCanvas.addEventListener('touchstart', e => {
+            if(e.touches && e.touches[0]){
+                const rect = simCanvas.getBoundingClientRect();
+                hoverX = e.touches[0].clientX - rect.left;
+                hoverY = e.touches[0].clientY - rect.top;
+                isHovering = true;
             }
-        },{passive:false});
+        });
+        simCanvas.addEventListener('touchend', () => { isHovering = false; });
 
-        const posSelect=document.getElementById('pos-charge-select');
-        const negSelect=document.getElementById('neg-charge-select');
-        posSelect.addEventListener('click',()=>{selectedChargeType=1;posSelect.className="px-3 py-2 bg-primaryCyan/20 border border-primaryCyan/40 text-primaryCyan text-[8px] font-wide uppercase tracking-wider transition-all";negSelect.className="px-3 py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-wide uppercase tracking-wider transition-all";});
-        negSelect.addEventListener('click',()=>{selectedChargeType=-1;negSelect.className="px-3 py-2 bg-secondaryTeal/20 border border-secondaryTeal/40 text-secondaryTeal text-[8px] font-wide uppercase tracking-wider transition-all";posSelect.className="px-3 py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-wide uppercase tracking-wider transition-all";});
-        document.getElementById('clear-charge-nodes').addEventListener('click',()=>{chargedNodes=[];drawSandbox();});
-
-        function getElectrostaticVector(x,y){
-            let Ex=0,Ey=0;
-            for(let n of chargedNodes){let dx=x-n.x,dy=y-n.y,r2=dx*dx+dy*dy,r=Math.sqrt(r2);if(r>6){Ex+=(n.q*dx)/(r2*r);Ey+=(n.q*dy)/(r2*r);}}
-            return{x:Ex,y:Ey};
+        function updateParticles() {
+            for (let i = exhaustParticles.length - 1; i >= 0; i--) {
+                let p = exhaustParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.size *= p.decay || 0.98;
+                p.alpha -= p.alphaDecay || 0.02;
+                if (p.alpha <= 0 || p.size < 0.5) {
+                    exhaustParticles.splice(i, 1);
+                }
+            }
         }
 
-        function drawSandbox(){
-            sCtx.fillStyle='#020306'; sCtx.fillRect(0,0,simWidth,simHeight);
-            sCtx.lineWidth=1;
-            for(let node of chargedNodes){
-                if(node.q>0){
-                    const lines=16;
-                    for(let i=0;i<lines;i++){
-                        const angle=(i/lines)*Math.PI*2;
-                        let px=node.x+Math.cos(angle)*8,py=node.y+Math.sin(angle)*8;
-                        sCtx.beginPath(); sCtx.strokeStyle='rgba(0,229,255,0.25)'; sCtx.moveTo(px,py);
-                        let steps=0;
-                        while(steps<220){
-                            let E=getElectrostaticVector(px,py),Em=Math.sqrt(E.x*E.x+E.y*E.y);
-                            if(Em===0)break;
-                            px+=(E.x/Em)*3; py+=(E.y/Em)*3; sCtx.lineTo(px,py);
-                            let ended=false;
-                            for(let other of chargedNodes){if(other!==node&&Math.sqrt((px-other.x)**2+(py-other.y)**2)<8){ended=true;break;}}
-                            if(ended||px<0||px>simWidth||py<0||py>simHeight)break;
-                            steps++;
-                        }
-                        sCtx.stroke();
+        // --- PISTON RENDERING ENGINE ---
+        function drawPistonCylinder(x, crankY, R, L, angle, offset, strokeNum, maxCyls = 4) {
+            let activeAngle = angle + offset;
+            let cx = x + R * Math.cos(activeAngle);
+            let cy = crankY + R * Math.sin(activeAngle);
+            
+            let dx = cx - x;
+            let dy = Math.sqrt(L*L - dx*dx);
+            let py = cy - dy;
+            
+            let cylW = maxCyls > 6 ? 14 : 26;
+            let cylTop = crankY - L - R - 12;
+
+            sCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+            sCtx.lineWidth = 1.5;
+            sCtx.beginPath();
+            sCtx.moveTo(x - cylW/2, cylTop);
+            sCtx.lineTo(x - cylW/2, crankY - R);
+            sCtx.moveTo(x + cylW/2, cylTop);
+            sCtx.lineTo(x + cylW/2, crankY - R);
+            sCtx.moveTo(x - cylW/2, cylTop);
+            sCtx.lineTo(x + cylW/2, cylTop);
+            sCtx.stroke();
+
+            let normAngle = (activeAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+            let distToTDC = Math.abs(normAngle - 1.5 * Math.PI);
+            let visualCombustion = distToTDC < 0.25;
+
+            if (visualCombustion) {
+                let sparkPower = (0.25 - distToTDC) / 0.25;
+                let grad = sCtx.createRadialGradient(x, cylTop, 0, x, cylTop, cylW);
+                grad.addColorStop(0, `rgba(255, 120, 0, ${sparkPower * 0.95})`);
+                grad.addColorStop(1, 'transparent');
+                sCtx.fillStyle = grad;
+                sCtx.beginPath();
+                sCtx.arc(x, cylTop, cylW, 0, Math.PI, false);
+                sCtx.fill();
+
+                if (Math.random() < 0.35) {
+                    exhaustParticles.push({
+                        x: x + (Math.random() - 0.5) * cylW * 0.5,
+                        y: cylTop + 4,
+                        vx: (Math.random() - 0.5) * 1.5,
+                        vy: Math.random() * 2.5 + 1,
+                        size: Math.random() * 2 + 1,
+                        alpha: 1,
+                        decay: 0.94,
+                        alphaDecay: 0.05,
+                        color: '#FF6B00'
+                    });
+                }
+            }
+
+            sCtx.strokeStyle = 'rgba(255,255,255,0.22)';
+            sCtx.lineWidth = maxCyls > 6 ? 1 : 2;
+            sCtx.beginPath();
+            sCtx.moveTo(cx, cy);
+            sCtx.lineTo(x, py);
+            sCtx.stroke();
+
+            sCtx.fillStyle = '#00E5FF';
+            sCtx.beginPath();
+            sCtx.arc(cx, cy, maxCyls > 6 ? 2 : 3.5, 0, Math.PI*2);
+            sCtx.fill();
+
+            sCtx.fillStyle = '#14B8A6';
+            sCtx.beginPath();
+            sCtx.arc(x, py, maxCyls > 6 ? 1.5 : 2.5, 0, Math.PI*2);
+            sCtx.fill();
+
+            let pistH = maxCyls > 6 ? 6 : 12;
+            sCtx.fillStyle = '#1e293b';
+            sCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+            sCtx.lineWidth = 1;
+            sCtx.beginPath();
+            sCtx.rect(x - cylW/2 + 1, py - pistH, cylW - 2, pistH);
+            sCtx.fill();
+            sCtx.stroke();
+        }
+
+        function drawVEnginePair(centerX, crankY, R, L, theta, offset, phi, maxPairs = 4) {
+            let angle = theta + offset;
+            let cx = centerX + R * Math.cos(angle);
+            let cy = crankY + R * Math.sin(angle);
+
+            let vl = { x: -Math.sin(phi), y: -Math.cos(phi) };
+            let vr = { x: Math.sin(phi), y: -Math.cos(phi) };
+
+            let Dx = cx - centerX;
+            let Dy = cy - crankY;
+
+            let vD_l = vl.x * Dx + vl.y * Dy;
+            let vD_r = vr.x * Dx + vr.y * Dy;
+
+            let d_l = -vD_l + Math.sqrt(vD_l * vD_l - (R*R - L*L));
+            let d_r = -vD_r + Math.sqrt(vD_r * vD_r - (R*R - L*L));
+
+            let pl = { x: centerX + d_l * vl.x, y: crankY + d_l * vl.y };
+            let pr = { x: centerX + d_r * vr.x, y: crankY + d_r * vr.y };
+
+            let cylW = maxPairs > 3 ? 12 : 20;
+            let cylH = 45;
+
+            function drawSingleBank(p, v, isLeft) {
+                let headX = centerX + (d_l + 12) * v.x;
+                let headY = crankY + (d_l + 12) * v.y;
+                if (!isLeft) {
+                    headX = centerX + (d_r + 12) * v.x;
+                    headY = crankY + (d_r + 12) * v.y;
+                }
+
+                sCtx.save();
+                sCtx.translate(headX, headY);
+                sCtx.rotate(isLeft ? -phi : phi);
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+                sCtx.lineWidth = 1.5;
+                sCtx.beginPath();
+                sCtx.moveTo(-cylW/2, 0);
+                sCtx.lineTo(-cylW/2, -cylH);
+                sCtx.moveTo(cylW/2, 0);
+                sCtx.lineTo(cylW/2, -cylH);
+                sCtx.moveTo(-cylW/2, -cylH);
+                sCtx.lineTo(cylW/2, -cylH);
+                sCtx.stroke();
+
+                let normAngle = (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+                let targetTDC = isLeft ? 1.5 * Math.PI - phi : 1.5 * Math.PI + phi;
+                let distToTDC = Math.abs(normAngle - (targetTDC % (2 * Math.PI)));
+                if (distToTDC > Math.PI) distToTDC = 2 * Math.PI - distToTDC;
+
+                if (distToTDC < 0.25) {
+                    let sparkPower = (0.25 - distToTDC) / 0.25;
+                    let grad = sCtx.createRadialGradient(0, -cylH, 0, 0, -cylH, cylW);
+                    grad.addColorStop(0, `rgba(255, 100, 0, ${sparkPower * 0.95})`);
+                    grad.addColorStop(1, 'transparent');
+                    sCtx.fillStyle = grad;
+                    sCtx.beginPath();
+                    sCtx.arc(0, -cylH, cylW, 0, Math.PI, false);
+                    sCtx.fill();
+                }
+                sCtx.restore();
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.18)';
+                sCtx.lineWidth = 1.5;
+                sCtx.beginPath();
+                sCtx.moveTo(cx, cy);
+                sCtx.lineTo(p.x, p.y);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#14B8A6';
+                sCtx.beginPath();
+                sCtx.arc(p.x, p.y, 2, 0, Math.PI*2);
+                sCtx.fill();
+
+                sCtx.save();
+                sCtx.translate(p.x, p.y);
+                sCtx.rotate(isLeft ? -phi : phi);
+                sCtx.fillStyle = '#1e293b';
+                sCtx.strokeStyle = 'rgba(255,255,255,0.35)';
+                sCtx.beginPath();
+                sCtx.rect(-cylW/2 + 1, -8, cylW - 2, 8);
+                sCtx.fill();
+                sCtx.stroke();
+                sCtx.restore();
+            }
+
+            drawSingleBank(pl, vl, true);
+            drawSingleBank(pr, vr, false);
+
+            sCtx.fillStyle = '#00E5FF';
+            sCtx.beginPath();
+            sCtx.arc(cx, cy, 2.5, 0, Math.PI*2);
+            sCtx.fill();
+        }
+
+        function drawWEngineRow(centerX, crankY, R, L, theta, offset, phi, maxRows = 4) {
+            let angle = theta + offset;
+            let cx = centerX + R * Math.cos(angle);
+            let cy = crankY + R * Math.sin(angle);
+
+            let vl = { x: -Math.sin(phi), y: -Math.cos(phi) };
+            let vc = { x: 0, y: -1 };
+            let vr = { x: Math.sin(phi), y: -Math.cos(phi) };
+
+            let Dx = cx - centerX;
+            let Dy = cy - crankY;
+
+            let vD_l = vl.x * Dx + vl.y * Dy;
+            let vD_c = vc.x * Dx + vc.y * Dy;
+            let vD_r = vr.x * Dx + vr.y * Dy;
+
+            let d_l = -vD_l + Math.sqrt(vD_l * vD_l - (R*R - L*L));
+            let d_c = -vD_c + Math.sqrt(vD_c * vD_c - (R*R - L*L));
+            let d_r = -vD_r + Math.sqrt(vD_r * vD_r - (R*R - L*L));
+
+            let pl = { x: centerX + d_l * vl.x, y: crankY + d_l * vl.y };
+            let pc = { x: centerX + d_c * vc.x, y: crankY + d_c * vc.y };
+            let pr = { x: centerX + d_r * vr.x, y: crankY + d_r * vr.y };
+
+            let cylW = 10;
+            let cylH = 40;
+
+            function drawBank(p, v, angleOffset) {
+                let headX = centerX + (d_l + 10) * v.x;
+                let headY = crankY + (d_l + 10) * v.y;
+
+                sCtx.save();
+                sCtx.translate(headX, headY);
+                sCtx.rotate(angleOffset);
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+                sCtx.lineWidth = 1.2;
+                sCtx.beginPath();
+                sCtx.moveTo(-cylW/2, 0);
+                sCtx.lineTo(-cylW/2, -cylH);
+                sCtx.moveTo(cylW/2, 0);
+                sCtx.lineTo(cylW/2, -cylH);
+                sCtx.moveTo(-cylW/2, -cylH);
+                sCtx.lineTo(cylW/2, -cylH);
+                sCtx.stroke();
+
+                let normAngle = (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+                let targetTDC = 1.5 * Math.PI + angleOffset;
+                let distToTDC = Math.abs(normAngle - (targetTDC % (2 * Math.PI)));
+                if (distToTDC > Math.PI) distToTDC = 2 * Math.PI - distToTDC;
+
+                if (distToTDC < 0.25) {
+                    let sparkPower = (0.25 - distToTDC) / 0.25;
+                    let grad = sCtx.createRadialGradient(0, -cylH, 0, 0, -cylH, cylW);
+                    grad.addColorStop(0, `rgba(255, 100, 0, ${sparkPower * 0.95})`);
+                    grad.addColorStop(1, 'transparent');
+                    sCtx.fillStyle = grad;
+                    sCtx.beginPath();
+                    sCtx.arc(0, -cylH, cylW, 0, Math.PI, false);
+                    sCtx.fill();
+                }
+                sCtx.restore();
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.14)';
+                sCtx.lineWidth = 1;
+                sCtx.beginPath();
+                sCtx.moveTo(cx, cy);
+                sCtx.lineTo(p.x, p.y);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#14B8A6';
+                sCtx.beginPath();
+                sCtx.arc(p.x, p.y, 1.5, 0, Math.PI*2);
+                sCtx.fill();
+
+                sCtx.save();
+                sCtx.translate(p.x, p.y);
+                sCtx.rotate(angleOffset);
+                sCtx.fillStyle = '#1e293b';
+                sCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+                sCtx.beginPath();
+                sCtx.rect(-cylW/2 + 1, -6, cylW - 2, 6);
+                sCtx.fill();
+                sCtx.stroke();
+                sCtx.restore();
+            }
+
+            drawBank(pl, vl, -phi);
+            drawBank(pc, vc, 0);
+            drawBank(pr, vr, phi);
+
+            sCtx.fillStyle = '#00E5FF';
+            sCtx.beginPath();
+            sCtx.arc(cx, cy, 2, 0, Math.PI*2);
+            sCtx.fill();
+        }
+
+        function drawPistonSection() {
+            let maxCyl = 1;
+            let crankY = simHeight * 0.7;
+            let R = 15;
+            let L = 50;
+
+            if (currentEngineId === 'i3') {
+                maxCyl = 3;
+                let spacing = simWidth / (maxCyl + 1);
+                let offsets = [0, 2*Math.PI/3, 4*Math.PI/3];
+                for (let i = 0; i < maxCyl; i++) {
+                    drawPistonCylinder(spacing * (i + 1), crankY, R, L, simTime, offsets[i], i, maxCyl);
+                }
+            } else if (currentEngineId === 'i4') {
+                maxCyl = 4;
+                let spacing = simWidth / (maxCyl + 1);
+                let offsets = [0, Math.PI, Math.PI, 0];
+                for (let i = 0; i < maxCyl; i++) {
+                    drawPistonCylinder(spacing * (i + 1), crankY, R, L, simTime, offsets[i], i, maxCyl);
+                }
+            } else if (currentEngineId === 'i5') {
+                maxCyl = 5;
+                let spacing = simWidth / (maxCyl + 1);
+                let offsets = [0, 1.25, 2.5, 3.75, 5];
+                for (let i = 0; i < maxCyl; i++) {
+                    drawPistonCylinder(spacing * (i + 1), crankY, R, L, simTime, offsets[i], i, maxCyl);
+                }
+            } else if (currentEngineId === 'i6') {
+                maxCyl = 6;
+                let spacing = simWidth / (maxCyl + 1);
+                let offsets = [0, 2*Math.PI/3, 4*Math.PI/3, 4*Math.PI/3, 2*Math.PI/3, 0];
+                for (let i = 0; i < maxCyl; i++) {
+                    drawPistonCylinder(spacing * (i + 1), crankY, R, L, simTime, offsets[i], i, maxCyl);
+                }
+            } else if (currentEngineId === 'v6') {
+                let pairs = 3;
+                let phi = Math.PI / 6;
+                let spacing = simWidth / (pairs + 1);
+                let offsets = [0, 2*Math.PI/3, 4*Math.PI/3];
+                for (let i = 0; i < pairs; i++) {
+                    drawVEnginePair(spacing * (i + 1), crankY, R, L, simTime, offsets[i], phi, pairs);
+                }
+            } else if (currentEngineId === 'v8') {
+                let pairs = 4;
+                let phi = Math.PI / 4;
+                let spacing = simWidth / (pairs + 1);
+                let offsets = [0, Math.PI/2, Math.PI, 1.5*Math.PI];
+                for (let i = 0; i < pairs; i++) {
+                    drawVEnginePair(spacing * (i + 1), crankY, R, L, simTime, offsets[i], phi, pairs);
+                }
+            } else if (currentEngineId === 'v10') {
+                let pairs = 5;
+                let phi = Math.PI / 5;
+                let spacing = simWidth / (pairs + 1);
+                let offsets = [0, 1.25, 2.5, 3.75, 5];
+                for (let i = 0; i < pairs; i++) {
+                    drawVEnginePair(spacing * (i + 1), crankY, R, L, simTime, offsets[i], phi, pairs);
+                }
+            } else if (currentEngineId === 'v12') {
+                let pairs = 6;
+                let phi = Math.PI / 6;
+                let spacing = simWidth / (pairs + 1);
+                let offsets = [0, Math.PI/3, 2*Math.PI/3, Math.PI, 4*Math.PI/3, 5*Math.PI/3];
+                for (let i = 0; i < pairs; i++) {
+                    drawVEnginePair(spacing * (i + 1), crankY, R, L, simTime, offsets[i], phi, pairs);
+                }
+            } else if (currentEngineId === 'W') {
+                let rows = 4;
+                let phi = Math.PI / 4.5;
+                let spacing = simWidth / (rows + 1);
+                let offsets = [0, Math.PI/2, Math.PI, 1.5*Math.PI];
+                for (let i = 0; i < rows; i++) {
+                    drawWEngineRow(spacing * (i + 1), crankY, R, L, simTime, offsets[i], phi, rows);
+                }
+            }
+
+            sCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+            sCtx.lineWidth = 3;
+            sCtx.beginPath();
+            sCtx.moveTo(20, crankY);
+            sCtx.lineTo(simWidth - 20, crankY);
+            sCtx.stroke();
+
+            sCtx.fillStyle = 'rgba(0, 229, 255, 0.1)';
+            sCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+            sCtx.lineWidth = 1;
+            let activeLoop = (currentEngineId === 'W') ? 4 : (maxCyl > 6 ? 3 : maxCyl);
+            if (currentEngineId === 'v12') activeLoop = 6;
+            if (currentEngineId === 'v10') activeLoop = 5;
+            if (currentEngineId === 'v8') activeLoop = 4;
+            let spacing = simWidth / (activeLoop + 1);
+            for (let i = 0; i < activeLoop; i++) {
+                sCtx.beginPath();
+                sCtx.arc(spacing * (i + 1), crankY, R + 3, 0, Math.PI*2);
+                sCtx.fill();
+                sCtx.stroke();
+            }
+
+            let rpm = Math.floor(simThrottle * 60);
+            coordReadout.innerText = `METRICS: ${rpm} RPM // TIMING SEQUENCE: UNIFIED`;
+        }
+
+        // --- ROCKET PROPULSION RENDERING ---
+        function drawRocketSection() {
+            let throttleFactor = simThrottle / 100;
+            coordReadout.innerText = `PROPULSION DIAGNOSIS: PLUME EXPANSION VELOCITY ${(4150 * throttleFactor).toFixed(0)} m/s`;
+
+            if (currentEngineId === 'liquid') {
+                sCtx.fillStyle = 'rgba(0, 229, 255, 0.08)';
+                sCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+                sCtx.lineWidth = 1.2;
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.35, simHeight*0.22, 20, 0, Math.PI*2);
+                sCtx.fill(); sCtx.stroke();
+                sCtx.fillStyle = 'rgba(0, 229, 255, 0.4)';
+                sCtx.font = 'bold 8px monospace';
+                sCtx.textAlign = 'center';
+                sCtx.fillText("LOX", simWidth*0.35, simHeight*0.24);
+
+                sCtx.fillStyle = 'rgba(20, 184, 166, 0.08)';
+                sCtx.strokeStyle = 'rgba(20, 184, 166, 0.25)';
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.65, simHeight*0.22, 20, 0, Math.PI*2);
+                sCtx.fill(); sCtx.stroke();
+                sCtx.fillStyle = 'rgba(20, 184, 166, 0.4)';
+                sCtx.fillText("LH2", simWidth*0.65, simHeight*0.24);
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+                sCtx.lineWidth = 1.5;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.35, simHeight*0.27);
+                sCtx.lineTo(simWidth*0.46, simHeight*0.32);
+                sCtx.lineTo(simWidth*0.46, simHeight*0.4);
+                sCtx.stroke();
+
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.65, simHeight*0.27);
+                sCtx.lineTo(simWidth*0.54, simHeight*0.32);
+                sCtx.lineTo(simWidth*0.54, simHeight*0.4);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#00E5FF';
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.46, simHeight*0.32, 4, 0, Math.PI*2);
+                sCtx.fill();
+                sCtx.fillStyle = '#14B8A6';
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.54, simHeight*0.32, 4, 0, Math.PI*2);
+                sCtx.fill();
+
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                sCtx.lineWidth = 2.5;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.46, simHeight*0.4);
+                sCtx.lineTo(simWidth*0.46, simHeight*0.48);
+                sCtx.lineTo(simWidth*0.49, simHeight*0.52);
+                sCtx.lineTo(simWidth*0.45, simHeight*0.62);
+                sCtx.moveTo(simWidth*0.54, simHeight*0.4);
+                sCtx.lineTo(simWidth*0.54, simHeight*0.48);
+                sCtx.lineTo(simWidth*0.51, simHeight*0.52);
+                sCtx.lineTo(simWidth*0.55, simHeight*0.62);
+                sCtx.stroke();
+
+                let grad = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.52, simWidth*0.5, simHeight*0.9);
+                grad.addColorStop(0, 'rgba(255, 180, 0, 0.85)');
+                grad.addColorStop(0.3, 'rgba(255, 80, 0, 0.55)');
+                grad.addColorStop(0.7, 'rgba(0, 229, 255, 0.2)');
+                grad.addColorStop(1, 'transparent');
+                sCtx.fillStyle = grad;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.49, simHeight*0.52);
+                sCtx.lineTo(simWidth*0.42, simHeight*0.88);
+                sCtx.lineTo(simWidth*0.58, simHeight*0.88);
+                sCtx.lineTo(simWidth*0.51, simHeight*0.52);
+                sCtx.fill();
+
+                let chamberGrad = sCtx.createRadialGradient(simWidth*0.5, simHeight*0.44, 1, simWidth*0.5, simHeight*0.44, 15);
+                chamberGrad.addColorStop(0, '#FFFFFF');
+                chamberGrad.addColorStop(0.5, '#FF6B00');
+                chamberGrad.addColorStop(1, 'transparent');
+                sCtx.fillStyle = chamberGrad;
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.5, simHeight*0.44, 15, 0, Math.PI*2);
+                sCtx.fill();
+
+                sCtx.strokeStyle = 'rgba(255, 235, 180, 0.8)';
+                let numDiamonds = 4;
+                for (let i = 0; i < numDiamonds; i++) {
+                    let dy = simHeight * 0.55 + i * 18 * throttleFactor;
+                    let dw = (9 - i * 1.5) * throttleFactor;
+                    let dh = (14 - i * 2) * throttleFactor;
+                    sCtx.beginPath();
+                    sCtx.moveTo(simWidth*0.5, dy - dh/2);
+                    sCtx.lineTo(simWidth*0.5 - dw, dy);
+                    sCtx.lineTo(simWidth*0.5, dy + dh/2);
+                    sCtx.lineTo(simWidth*0.5 + dw, dy);
+                    sCtx.closePath();
+                    sCtx.stroke();
+                }
+
+                if (Math.random() < 0.6) {
+                    exhaustParticles.push({
+                        x: simWidth * 0.5 + (Math.random() - 0.5) * 8,
+                        y: simHeight * 0.52,
+                        vx: (Math.random() - 0.5) * 5,
+                        vy: Math.random() * 8 + 6,
+                        size: Math.random() * 4 + 2,
+                        alpha: 1,
+                        decay: 0.95,
+                        alphaDecay: 0.04,
+                        color: Math.random() < 0.3 ? '#00E5FF' : '#FF5100'
+                    });
+                }
+            } 
+            else if (currentEngineId === 'solid') {
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                sCtx.lineWidth = 3;
+                sCtx.strokeRect(simWidth*0.42, simHeight*0.15, simWidth*0.16, simHeight*0.4);
+
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.5, simHeight*0.15, simWidth*0.08, Math.PI, 0, false);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#2d3748';
+                sCtx.fillRect(simWidth*0.425, simHeight*0.16, simWidth*0.045, simHeight*0.37);
+                sCtx.fillRect(simWidth*0.53, simHeight*0.16, simWidth*0.045, simHeight*0.37);
+
+                sCtx.strokeStyle = '#FF6B00';
+                sCtx.lineWidth = 2;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.47, simHeight*0.16);
+                sCtx.lineTo(simWidth*0.47, simHeight*0.53);
+                sCtx.moveTo(simWidth*0.53, simHeight*0.16);
+                sCtx.lineTo(simWidth*0.53, simHeight*0.53);
+                sCtx.stroke();
+
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                sCtx.lineWidth = 2.5;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.46, simHeight*0.55);
+                sCtx.lineTo(simWidth*0.43, simHeight*0.64);
+                sCtx.moveTo(simWidth*0.54, simHeight*0.55);
+                sCtx.lineTo(simWidth*0.57, simHeight*0.64);
+                sCtx.stroke();
+
+                let flameGrad = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.16, simWidth*0.5, simHeight*0.55);
+                flameGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+                flameGrad.addColorStop(0.5, 'rgba(255, 100, 0, 0.6)');
+                flameGrad.addColorStop(1, '#FF4500');
+                flameGrad.fillStyle = flameGrad;
+                flameGrad.fillRect(simWidth*0.472, simHeight*0.16, simWidth*0.056, simHeight*0.37);
+
+                let exhaustGrad = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.55, simWidth*0.5, simHeight*0.9);
+                exhaustGrad.addColorStop(0, '#FFFFFF');
+                exhaustGrad.addColorStop(0.2, '#FFA500');
+                exhaustGrad.addColorStop(0.5, 'rgba(100, 100, 100, 0.4)');
+                exhaustGrad.addColorStop(1, 'transparent');
+                sCtx.fillStyle = exhaustGrad;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.47, simHeight*0.55);
+                sCtx.lineTo(simWidth*0.35, simHeight*0.88);
+                sCtx.lineTo(simWidth*0.65, simHeight*0.88);
+                sCtx.lineTo(simWidth*0.53, simHeight*0.55);
+                sCtx.fill();
+
+                for (let k = 0; k < 2; k++) {
+                    if (Math.random() < 0.7) {
+                        exhaustParticles.push({
+                            x: simWidth * 0.5 + (Math.random() - 0.5) * 16,
+                            y: simHeight * 0.55 + Math.random() * 5,
+                            vx: (Math.random() - 0.5) * 4,
+                            vy: Math.random() * 5 + 4,
+                            size: Math.random() * 8 + 3,
+                            alpha: 0.85,
+                            decay: 0.98,
+                            alphaDecay: 0.025,
+                            color: Math.random() < 0.4 ? 'rgba(120, 120, 120, 0.5)' : '#FF5F00'
+                        });
+                    }
+                }
+            } 
+            else if (currentEngineId === 'hybrid') {
+                sCtx.fillStyle = 'rgba(0, 229, 255, 0.08)';
+                sCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+                sCtx.lineWidth = 1.2;
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.5, simHeight*0.2, 16, 0, Math.PI*2);
+                sCtx.fill(); sCtx.stroke();
+                sCtx.fillStyle = 'rgba(0, 229, 255, 0.4)';
+                sCtx.fillText("LIQ_OX", simWidth*0.5, simHeight*0.21);
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+                sCtx.lineWidth = 2;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.5, simHeight*0.23);
+                sCtx.lineTo(simWidth*0.5, simHeight*0.3);
+                sCtx.stroke();
+
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                sCtx.lineWidth = 2;
+                sCtx.strokeRect(simWidth*0.44, simHeight*0.31, simWidth*0.12, simHeight*0.24);
+
+                sCtx.fillStyle = '#4a5568';
+                sCtx.fillRect(simWidth*0.445, simHeight*0.315, simWidth*0.035, simHeight*0.23);
+                sCtx.fillRect(simWidth*0.52, simHeight*0.315, simWidth*0.035, simHeight*0.23);
+
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.47, simHeight*0.55);
+                sCtx.lineTo(simWidth*0.44, simHeight*0.63);
+                sCtx.moveTo(simWidth*0.53, simHeight*0.55);
+                sCtx.lineTo(simWidth*0.56, simHeight*0.63);
+                sCtx.stroke();
+
+                let gradientEx = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.55, simWidth*0.5, simHeight*0.9);
+                gradientEx.addColorStop(0, '#FFA500');
+                gradientEx.addColorStop(0.4, 'rgba(255, 50, 0, 0.4)');
+                gradientEx.addColorStop(1, 'transparent');
+                sCtx.fillStyle = gradientEx;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.48, simHeight*0.55);
+                sCtx.lineTo(simWidth*0.38, simHeight*0.85);
+                sCtx.lineTo(simWidth*0.62, simHeight*0.85);
+                sCtx.lineTo(simWidth*0.52, simHeight*0.55);
+                sCtx.fill();
+
+                if (Math.random() < 0.5) {
+                    exhaustParticles.push({
+                        x: simWidth * 0.5 + (Math.random() - 0.5) * 10,
+                        y: simHeight * 0.55,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: Math.random() * 6 + 5,
+                        size: Math.random() * 4 + 1.5,
+                        alpha: 1,
+                        decay: 0.96,
+                        alphaDecay: 0.03,
+                        color: '#FF6F00'
+                    });
+                }
+            } 
+            else if (currentEngineId === 'ion') {
+                sCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+                sCtx.lineWidth = 1.5;
+                sCtx.strokeRect(simWidth*0.42, simHeight*0.25, simWidth*0.16, simHeight*0.22);
+
+                sCtx.strokeStyle = '#00E5FF';
+                sCtx.lineWidth = 2;
+                sCtx.setLineDash([4, 4]);
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.42, simHeight*0.36);
+                sCtx.lineTo(simWidth*0.58, simHeight*0.36);
+                sCtx.moveTo(simWidth*0.42, simHeight*0.43);
+                sCtx.lineTo(simWidth*0.58, simHeight*0.43);
+                sCtx.stroke();
+                sCtx.setLineDash([]);
+
+                sCtx.fillStyle = 'rgba(0, 229, 255, 0.4)';
+                sCtx.font = '6px monospace';
+                sCtx.fillText("ANODE GRID", simWidth*0.35, simHeight*0.36);
+                sCtx.fillText("CATHODE GRID", simWidth*0.34, simHeight*0.43);
+
+                let plasma = sCtx.createRadialGradient(simWidth*0.5, simHeight*0.31, 2, simWidth*0.5, simHeight*0.31, 22);
+                plasma.addColorStop(0, 'rgba(0, 229, 255, 0.55)');
+                plasma.addColorStop(0.7, 'rgba(155, 140, 255, 0.2)');
+                plasma.addColorStop(1, 'transparent');
+                sCtx.fillStyle = plasma;
+                sCtx.beginPath();
+                sCtx.arc(simWidth*0.5, simHeight*0.31, 22, 0, Math.PI*2);
+                sCtx.fill();
+
+                let beam = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.47, simWidth*0.5, simHeight*0.9);
+                beam.addColorStop(0, 'rgba(0, 229, 255, 0.7)');
+                beam.addColorStop(0.3, 'rgba(155, 140, 255, 0.35)');
+                beam.addColorStop(1, 'transparent');
+                sCtx.fillStyle = beam;
+                sCtx.beginPath();
+                sCtx.moveTo(simWidth*0.44, simHeight*0.47);
+                sCtx.lineTo(simWidth*0.45, simHeight*0.85);
+                sCtx.lineTo(simWidth*0.55, simHeight*0.85);
+                sCtx.lineTo(simWidth*0.56, simHeight*0.47);
+                sCtx.fill();
+
+                for (let i = 0; i < 3; i++) {
+                    if (Math.random() < 0.75) {
+                        exhaustParticles.push({
+                            x: simWidth*0.44 + Math.random()*simWidth*0.12,
+                            y: simHeight*0.47,
+                            vx: (Math.random() - 0.5) * 0.4,
+                            vy: Math.random() * 10 + 8,
+                            size: Math.random() * 1.5 + 0.5,
+                            alpha: 1,
+                            decay: 0.98,
+                            alphaDecay: 0.012,
+                            color: Math.random() < 0.5 ? '#00E5FF' : '#9b8cff'
+                        });
                     }
                 }
             }
-            chargedNodes.forEach(c=>{
-                const isPos=c.q>0;
-                sCtx.beginPath(); sCtx.arc(c.x,c.y,8,0,Math.PI*2); sCtx.fillStyle=isPos?'#00E5FF':'#14B8A6'; sCtx.fill();
-                sCtx.fillStyle='#020306'; sCtx.font='bold 9px monospace'; sCtx.textAlign='center'; sCtx.textBaseline='middle';
-                sCtx.fillText(isPos?'+':'-',c.x,c.y);
-            });
         }
+
+        // --- JET TURBINE RENDERING ---
+        function drawSpinningBlades(x, y, r, numBlades, angle) {
+            sCtx.strokeStyle = 'rgba(255,255,255,0.35)';
+            sCtx.lineWidth = 1.2;
+            for (let i = 0; i < numBlades; i++) {
+                let bAngle = angle + (i / numBlades) * Math.PI * 2;
+                let bx = x;
+                let by = y + r * Math.sin(bAngle);
+                sCtx.beginPath();
+                sCtx.moveTo(x, y);
+                sCtx.lineTo(bx, by);
+                sCtx.stroke();
+            }
+        }
+
+        function drawJetSection() {
+            let throttleFactor = simThrottle / 100;
+            coordReadout.innerText = `TURBINE FEED: STATIC PRESSURE ${(14.2 * throttleFactor).toFixed(1)}:1 // CORE: ACTIVE`;
+
+            let coreY = simHeight * 0.5;
+            let casingXStart = simWidth * 0.15;
+            let casingXEnd = simWidth * 0.85;
+            let casingHeight = 45;
+
+            if (currentEngineId === 'turbojet') {
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                sCtx.lineWidth = 2;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart, coreY - casingHeight);
+                sCtx.lineTo(casingXStart + 120, coreY - casingHeight + 5);
+                sCtx.lineTo(casingXEnd - 60, coreY - casingHeight + 15);
+                sCtx.lineTo(casingXEnd, coreY - 12);
+                sCtx.moveTo(casingXStart, coreY + casingHeight);
+                sCtx.lineTo(casingXStart + 120, coreY + casingHeight - 5);
+                sCtx.lineTo(casingXEnd - 60, coreY + casingHeight - 15);
+                sCtx.lineTo(casingXEnd, coreY + 12);
+                sCtx.stroke();
+
+                sCtx.strokeStyle = '#a0aec0';
+                sCtx.lineWidth = 3;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart + 20, coreY);
+                sCtx.lineTo(casingXEnd - 20, coreY);
+                sCtx.stroke();
+
+                let rotationAngle = simTime * 1.5;
+                for (let i = 0; i < 4; i++) {
+                    drawSpinningBlades(casingXStart + 35 + i * 20, coreY, casingHeight - 6 - i * 5, 6, rotationAngle * (1 + i * 0.1));
+                }
+
+                drawSpinningBlades(casingXEnd - 60, coreY, 25, 6, rotationAngle * 1.4);
+
+                let combustorX = casingXStart + 125;
+                let combustorW = 50;
+                let gradComb = sCtx.createRadialGradient(combustorX + combustorW/2, coreY, 2, combustorX + combustorW/2, coreY, 30);
+                gradComb.addColorStop(0, '#FFFFFF');
+                gradComb.addColorStop(0.5, '#FF6B00');
+                gradComb.addColorStop(1, 'transparent');
+                sCtx.fillStyle = gradComb;
+                sCtx.beginPath();
+                sCtx.arc(combustorX + combustorW/2, coreY - 20, 16, 0, Math.PI*2);
+                sCtx.arc(combustorX + combustorW/2, coreY + 20, 16, 0, Math.PI*2);
+                sCtx.fill();
+
+                let gradPlume = sCtx.createLinearGradient(casingXEnd - 20, coreY, casingXEnd + 80, coreY);
+                gradPlume.addColorStop(0, 'rgba(255, 120, 0, 0.8)');
+                gradPlume.addColorStop(0.4, 'rgba(255, 40, 0, 0.4)');
+                gradPlume.addColorStop(1, 'transparent');
+                sCtx.fillStyle = gradPlume;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXEnd - 20, coreY - 12);
+                sCtx.lineTo(casingXEnd + 75, coreY - 18);
+                sCtx.lineTo(casingXEnd + 75, coreY + 18);
+                sCtx.lineTo(casingXEnd - 20, coreY + 12);
+                sCtx.fill();
+
+                if (Math.random() < 0.5) {
+                    exhaustParticles.push({
+                        x: casingXStart,
+                        y: coreY + (Math.random() - 0.5) * (casingHeight * 1.5),
+                        vx: Math.random() * 3 + 4,
+                        vy: 0,
+                        size: Math.random() * 2 + 1,
+                        alpha: 0.6,
+                        decay: 0.99,
+                        alphaDecay: 0.006,
+                        color: '#00E5FF'
+                    });
+                }
+                if (Math.random() < 0.4) {
+                    exhaustParticles.push({
+                        x: casingXEnd - 10,
+                        y: coreY + (Math.random() - 0.5) * 12,
+                        vx: Math.random() * 5 + 5,
+                        vy: (Math.random() - 0.5) * 1,
+                        size: Math.random() * 3 + 1,
+                        alpha: 1,
+                        decay: 0.95,
+                        alphaDecay: 0.03,
+                        color: '#FF5E00'
+                    });
+                }
+            }
+            else if (currentEngineId === 'turbofan') {
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                sCtx.lineWidth = 1.8;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart - 20, coreY - casingHeight - 12);
+                sCtx.lineTo(casingXStart + 70, coreY - casingHeight - 12);
+                sCtx.lineTo(casingXEnd - 40, coreY - casingHeight);
+                sCtx.moveTo(casingXStart - 20, coreY + casingHeight + 12);
+                sCtx.lineTo(casingXStart + 70, coreY + casingHeight + 12);
+                sCtx.lineTo(casingXEnd - 40, coreY + casingHeight);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#090d16';
+                sCtx.fillRect(casingXStart + 35, coreY - 22, 150, 44);
+                sCtx.strokeRect(casingXStart + 35, coreY - 22, 150, 44);
+
+                let rotateFan = simTime * 1.5;
+                drawSpinningBlades(casingXStart - 10, coreY, casingHeight + 8, 8, rotateFan);
+                drawSpinningBlades(casingXStart + 50, coreY, 15, 5, rotateFan * 1.2);
+
+                let gComb = sCtx.createRadialGradient(casingXStart + 130, coreY, 1, casingXStart + 130, coreY, 14);
+                gComb.addColorStop(0, '#FFFFFF');
+                gComb.addColorStop(0.6, '#FF5F00');
+                gComb.addColorStop(1, 'transparent');
+                sCtx.fillStyle = gComb;
+                sCtx.beginPath();
+                sCtx.arc(casingXStart + 130, coreY, 14, 0, Math.PI*2);
+                sCtx.fill();
+
+                let gPlume = sCtx.createLinearGradient(casingXEnd - 70, coreY, casingXEnd + 50, coreY);
+                gPlume.addColorStop(0, 'rgba(255, 70, 0, 0.7)');
+                gPlume.addColorStop(1, 'transparent');
+                sCtx.fillStyle = gPlume;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXEnd - 90, coreY - 8);
+                sCtx.lineTo(casingXEnd + 40, coreY - 12);
+                sCtx.lineTo(casingXEnd + 40, coreY + 12);
+                sCtx.lineTo(casingXEnd - 90, coreY + 8);
+                sCtx.fill();
+
+                sCtx.strokeStyle = 'rgba(0, 229, 255, 0.12)';
+                sCtx.lineWidth = 1;
+                for (let i = 0; i < 2; i++) {
+                    let sy1 = coreY - casingHeight - 4 + i * 4;
+                    let sy2 = coreY + casingHeight + 4 - i * 4;
+                    sCtx.beginPath();
+                    sCtx.moveTo(casingXStart - 15, sy1);
+                    sCtx.lineTo(casingXEnd - 40, sy1);
+                    sCtx.moveTo(casingXStart - 15, sy2);
+                    sCtx.lineTo(casingXEnd - 40, sy2);
+                    sCtx.stroke();
+                }
+
+                if (Math.random() < 0.5) {
+                    exhaustParticles.push({
+                        x: casingXStart - 15,
+                        y: coreY + (Math.random() - 0.5) * (casingHeight * 1.8),
+                        vx: Math.random() * 3 + 5,
+                        vy: 0,
+                        size: Math.random() * 1.5 + 1,
+                        alpha: 0.5,
+                        decay: 0.99,
+                        alphaDecay: 0.008,
+                        color: '#00E5FF'
+                    });
+                }
+            }
+            else if (currentEngineId === 'turboprop') {
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                sCtx.lineWidth = 1.5;
+                sCtx.strokeRect(casingXStart + 30, coreY - 15, 170, 30);
+
+                sCtx.fillStyle = '#a0aec0';
+                sCtx.beginPath();
+                sCtx.arc(casingXStart + 15, coreY - 3, 5, 0, Math.PI*2);
+                sCtx.arc(casingXStart + 15, coreY + 3, 5, 0, Math.PI*2);
+                sCtx.fill();
+
+                sCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart + 2, coreY - 8);
+                sCtx.lineTo(casingXStart - 10, coreY);
+                sCtx.lineTo(casingXStart + 2, coreY + 8);
+                sCtx.closePath();
+                sCtx.stroke();
+
+                let propAngle = simTime * 1.6;
+                sCtx.strokeStyle = 'rgba(255,255,255,0.65)';
+                sCtx.lineWidth = 3.5;
+                let bladeY = Math.sin(propAngle) * 65;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart, coreY);
+                sCtx.lineTo(casingXStart, coreY - bladeY);
+                sCtx.moveTo(casingXStart, coreY);
+                sCtx.lineTo(casingXStart, coreY + bladeY);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#FFC700';
+                sCtx.beginPath();
+                sCtx.arc(casingXStart, coreY - bladeY, 2.5, 0, Math.PI*2);
+                sCtx.arc(casingXStart, coreY + bladeY, 2.5, 0, Math.PI*2);
+                sCtx.fill();
+
+                drawSpinningBlades(casingXStart + 55, coreY, 12, 5, simTime * 1.5);
+                drawSpinningBlades(casingXStart + 150, coreY, 12, 5, simTime * 1.5);
+
+                let propPlume = sCtx.createLinearGradient(casingXStart + 200, coreY, casingXStart + 260, coreY);
+                propPlume.addColorStop(0, 'rgba(255, 60, 0, 0.5)');
+                propPlume.addColorStop(1, 'transparent');
+                sCtx.fillStyle = propPlume;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart + 200, coreY - 5);
+                sCtx.lineTo(casingXStart + 250, coreY - 8);
+                sCtx.lineTo(casingXStart + 250, coreY + 8);
+                sCtx.lineTo(casingXStart + 200, coreY + 5);
+                sCtx.fill();
+            }
+            else if (currentEngineId === 'ramjet') {
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                sCtx.lineWidth = 2;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart, coreY - casingHeight - 6);
+                sCtx.lineTo(casingXStart + 60, coreY - casingHeight + 5);
+                sCtx.lineTo(casingXEnd - 50, coreY - casingHeight + 5);
+                sCtx.lineTo(casingXEnd, coreY - casingHeight - 6);
+                sCtx.moveTo(casingXStart, coreY + casingHeight + 6);
+                sCtx.lineTo(casingXStart + 60, coreY + casingHeight - 5);
+                sCtx.lineTo(casingXEnd - 50, coreY + casingHeight - 5);
+                sCtx.lineTo(casingXEnd, coreY + casingHeight + 6);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#1e293b';
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart - 15, coreY);
+                sCtx.lineTo(casingXStart + 50, coreY - 20);
+                sCtx.lineTo(casingXStart + 140, coreY);
+                sCtx.lineTo(casingXStart + 50, coreY + 20);
+                sCtx.closePath();
+                sCtx.fill(); sCtx.stroke();
+
+                sCtx.strokeStyle = '#00E5FF';
+                sCtx.lineWidth = 1;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart - 15, coreY);
+                sCtx.lineTo(casingXStart, coreY - casingHeight - 6);
+                sCtx.moveTo(casingXStart - 15, coreY);
+                sCtx.lineTo(casingXStart, coreY + casingHeight + 6);
+                sCtx.stroke();
+
+                let ramPlume = sCtx.createLinearGradient(casingXStart + 140, coreY, casingXEnd, coreY);
+                ramPlume.addColorStop(0, '#FFFFFF');
+                ramPlume.addColorStop(0.3, '#FF6F00');
+                ramPlume.addColorStop(1, 'transparent');
+                sCtx.fillStyle = ramPlume;
+                sCtx.fillRect(casingXStart + 140, coreY - 18, 140, 36);
+
+                sCtx.strokeStyle = 'rgba(255, 235, 180, 0.8)';
+                sCtx.lineWidth = 1.2;
+                for (let i = 0; i < 4; i++) {
+                    let dx = casingXStart + 160 + i * 20 * throttleFactor;
+                    let dw = (10 - i * 1.5) * throttleFactor;
+                    let dh = (12 - i * 1.5) * throttleFactor;
+                    sCtx.beginPath();
+                    sCtx.moveTo(dx - dw/2, coreY);
+                    sCtx.lineTo(dx, coreY - dh);
+                    sCtx.lineTo(dx + dw/2, coreY);
+                    sCtx.lineTo(dx, coreY + dh);
+                    sCtx.closePath();
+                    sCtx.stroke();
+                }
+            }
+            else if (currentEngineId === 'scramjet') {
+                sCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                sCtx.lineWidth = 2;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart, coreY - casingHeight + 10);
+                sCtx.lineTo(casingXStart + 90, coreY - 12);
+                sCtx.lineTo(casingXEnd - 70, coreY - 12);
+                sCtx.lineTo(casingXEnd, coreY - casingHeight + 10);
+                sCtx.moveTo(casingXStart, coreY + casingHeight - 10);
+                sCtx.lineTo(casingXStart + 90, coreY + 12);
+                sCtx.lineTo(casingXEnd - 70, coreY + 12);
+                sCtx.lineTo(casingXEnd, coreY + casingHeight - 10);
+                sCtx.stroke();
+
+                sCtx.fillStyle = '#1e293b';
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart + 15, coreY);
+                sCtx.lineTo(casingXStart + 100, coreY - 5);
+                sCtx.lineTo(casingXEnd - 90, coreY);
+                sCtx.lineTo(casingXStart + 100, coreY + 5);
+                sCtx.closePath();
+                sCtx.fill();
+
+                sCtx.strokeStyle = '#00E5FF';
+                sCtx.lineWidth = 1;
+                sCtx.beginPath();
+                sCtx.moveTo(casingXStart, coreY - casingHeight + 10);
+                sCtx.lineTo(casingXStart + 60, coreY);
+                sCtx.lineTo(casingXStart + 120, coreY - 12);
+                sCtx.lineTo(casingXStart + 180, coreY);
+                sCtx.lineTo(casingXStart + 240, coreY - 12);
+                sCtx.moveTo(casingXStart, coreY + casingHeight - 10);
+                sCtx.lineTo(casingXStart + 60, coreY);
+                sCtx.lineTo(casingXStart + 120, coreY + 12);
+                sCtx.lineTo(casingXStart + 180, coreY);
+                sCtx.lineTo(casingXStart + 240, coreY + 12);
+                sCtx.stroke();
+
+                let scramGlow = sCtx.createLinearGradient(casingXStart + 160, coreY, casingXEnd + 80, coreY);
+                scramGlow.addColorStop(0, '#FFFFFF');
+                scramGlow.addColorStop(0.2, '#00E5FF');
+                scramGlow.addColorStop(0.5, '#FF3C00');
+                scramGlow.addColorStop(1, 'transparent');
+                sCtx.fillStyle = scramGlow;
+                sCtx.fillRect(casingXStart + 160, coreY - 10, 160, 20);
+
+                if (Math.random() < 0.7) {
+                    exhaustParticles.push({
+                        x: casingXStart + 160,
+                        y: coreY + (Math.random() - 0.5) * 14,
+                        vx: Math.random() * 10 + 8,
+                        vy: 0,
+                        size: Math.random() * 2 + 1,
+                        alpha: 1,
+                        decay: 0.95,
+                        alphaDecay: 0.04,
+                        color: '#00E5FF'
+                    });
+                }
+            }
+        }
+
+        // --- UNIFIED SIMULATION DRAW MASTER ---
+        function drawSandbox() {
+            sCtx.fillStyle = '#020306';
+            sCtx.fillRect(0, 0, simWidth, simHeight);
+
+            sCtx.strokeStyle = 'rgba(255,255,255,0.015)';
+            sCtx.lineWidth = 0.5;
+            let step = 20;
+            for (let x = 0; x < simWidth; x += step) {
+                sCtx.beginPath(); sCtx.moveTo(x, 0); sCtx.lineTo(x, simHeight); sCtx.stroke();
+            }
+            for (let y = 0; y < simHeight; y += step) {
+                sCtx.beginPath(); sCtx.moveTo(0, y); sCtx.lineTo(simWidth, y); sCtx.stroke();
+            }
+
+            if (currentCategory === 'piston') {
+                drawPistonSection();
+            } else if (currentCategory === 'rocket') {
+                drawRocketSection();
+            } else if (currentCategory === 'jet') {
+                drawJetSection();
+            }
+
+            updateParticles();
+            exhaustParticles.forEach(p => {
+                sCtx.fillStyle = p.color;
+                sCtx.globalAlpha = p.alpha;
+                sCtx.beginPath();
+                sCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                sCtx.fill();
+            });
+            sCtx.globalAlpha = 1.0;
+
+            if (isHovering) {
+                sCtx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
+                sCtx.lineWidth = 1;
+                sCtx.beginPath();
+                sCtx.arc(hoverX, hoverY, 12, 0, Math.PI * 2);
+                sCtx.moveTo(hoverX - 18, hoverY); sCtx.lineTo(hoverX + 18, hoverY);
+                sCtx.moveTo(hoverX, hoverY - 18); sCtx.lineTo(hoverX, hoverY + 18);
+                sCtx.stroke();
+
+                sCtx.fillStyle = 'rgba(0, 229, 255, 0.8)';
+                sCtx.font = '8px monospace';
+                sCtx.textAlign = 'left';
+                let temp = Math.floor(200 + (simThrottle / 120) * 1200 + (1 - hoverY / simHeight) * 1500);
+                if (currentCategory === 'rocket') temp = Math.floor(1000 + (simThrottle / 120) * 2200 + (hoverY / simHeight) * 800);
+                sCtx.fillText(`THERMAL_CORE: ${temp}°C`, hoverX + 22, hoverY - 4);
+                sCtx.fillText(`DIAG_POS: X:${hoverX.toFixed(0)} Y:${hoverY.toFixed(0)}`, hoverX + 22, hoverY + 6);
+            }
+        }
+
+        // --- ANIMATION SCHEDULER LOOP ---
+        function runSandboxLoop() {
+            simTime += (simThrottle / 100) * 0.12;
+            drawSandbox();
+            requestAnimationFrame(runSandboxLoop);
+        }
+
+        // Initial setup execution
+        populateEngineGrid('piston');
+        engineTitle.innerText = "INLINE 4 (I4)";
+        engineDesc.innerText = "Standard four-cylinder engine. Employs a flat-plane crankshaft firing sequentially.";
+        runSandboxLoop();
 
         // 3D tilt
         document.querySelectorAll('.hover-tilt').forEach(card=>{
