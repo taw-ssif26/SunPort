@@ -901,7 +901,9 @@
         // ==========================================
         const simCanvas = document.getElementById('field-simulation-canvas');
         const sCtx = simCanvas.getContext('2d');
-        let simWidth, simHeight;
+        
+        // Sensible non-zero defaults immediately initialized to prevent NaN states during boot.
+        let simWidth = 600, simHeight = 450; 
 
         let currentCategory = 'piston';
         let currentEngineId = 'i4';
@@ -952,11 +954,30 @@
         function resizeSandbox() {
             if (!simCanvas) return;
             const rect = simCanvas.parentNode.getBoundingClientRect();
-            simWidth = simCanvas.width = rect.width;
-            simHeight = simCanvas.height = rect.height;
+            simWidth = simCanvas.width = rect.width || 600;
+            simHeight = simCanvas.height = rect.height || 450;
         }
         window.addEventListener('resize', resizeSandbox);
-        setTimeout(resizeSandbox, 100);
+        resizeSandbox(); // Force immediate calculation to avoid initial layout crashes
+
+        // Fail-safe factories to defend context gradients from browser TypeError halting issues.
+        function safeCreateLinearGradient(x1, y1, x2, y2) {
+            let cx1 = isFinite(x1) ? x1 : 0;
+            let cy1 = isFinite(y1) ? y1 : 0;
+            let cx2 = isFinite(x2) ? x2 : 100;
+            let cy2 = isFinite(y2) ? y2 : 0;
+            return sCtx.createLinearGradient(cx1, cy1, cx2, cy2);
+        }
+
+        function safeCreateRadialGradient(x1, y1, r1, x2, y2, r2) {
+            let cx1 = isFinite(x1) ? x1 : 0;
+            let cy1 = isFinite(y1) ? y1 : 0;
+            let cr1 = (isFinite(r1) && r1 >= 0) ? r1 : 1;
+            let cx2 = isFinite(x2) ? x2 : 0;
+            let cy2 = isFinite(y2) ? y2 : 0;
+            let cr2 = (isFinite(r2) && r2 >= 0) ? r2 : 100;
+            return sCtx.createRadialGradient(cx1, cy1, cr1, cx2, cy2, cr2);
+        }
 
         function populateEngineGrid(cat) {
             selectGrid.innerHTML = '';
@@ -1024,8 +1045,8 @@
         function updateParticles() {
             for (let i = exhaustParticles.length - 1; i >= 0; i--) {
                 let p = exhaustParticles[i];
-                p.x += p.vx;
-                p.y += p.vy;
+                p.x += isFinite(p.vx) ? p.vx : 0;
+                p.y += isFinite(p.vy) ? p.vy : 0;
                 p.size *= p.decay || 0.98;
                 p.alpha -= p.alphaDecay || 0.02;
                 if (p.alpha <= 0 || p.size < 0.5) {
@@ -1041,7 +1062,8 @@
             let cy = crankY + R * Math.sin(activeAngle);
             
             let dx = cx - x;
-            let dy = Math.sqrt(L*L - dx*dx);
+            let rootVal = L*L - dx*dx;
+            let dy = rootVal >= 0 ? Math.sqrt(rootVal) : L;
             let py = cy - dy;
             
             let cylW = maxCyls > 6 ? 14 : 26;
@@ -1064,7 +1086,7 @@
 
             if (visualCombustion) {
                 let sparkPower = (0.25 - distToTDC) / 0.25;
-                let grad = sCtx.createRadialGradient(x, cylTop, 0, x, cylTop, cylW);
+                let grad = safeCreateRadialGradient(x, cylTop, 0, x, cylTop, cylW);
                 grad.addColorStop(0, `rgba(255, 120, 0, ${sparkPower * 0.95})`);
                 grad.addColorStop(1, 'transparent');
                 sCtx.fillStyle = grad;
@@ -1128,8 +1150,12 @@
             let vD_l = vl.x * Dx + vl.y * Dy;
             let vD_r = vr.x * Dx + vr.y * Dy;
 
-            let d_l = -vD_l + Math.sqrt(vD_l * vD_l - (R*R - L*L));
-            let d_r = -vD_r + Math.sqrt(vD_r * vD_r - (R*R - L*L));
+            let root_l = vD_l * vD_l - (R*R - L*L);
+            let root_r = vD_r * vD_r - (R*R - L*L);
+            if (root_l < 0 || root_r < 0) return;
+
+            let d_l = -vD_l + Math.sqrt(root_l);
+            let d_r = -vD_r + Math.sqrt(root_r);
 
             let pl = { x: centerX + d_l * vl.x, y: crankY + d_l * vl.y };
             let pr = { x: centerX + d_r * vr.x, y: crankY + d_r * vr.y };
@@ -1138,12 +1164,9 @@
             let cylH = 45;
 
             function drawSingleBank(p, v, isLeft) {
-                let headX = centerX + (d_l + 12) * v.x;
-                let headY = crankY + (d_l + 12) * v.y;
-                if (!isLeft) {
-                    headX = centerX + (d_r + 12) * v.x;
-                    headY = crankY + (d_r + 12) * v.y;
-                }
+                let curD = isLeft ? d_l : d_r;
+                let headX = centerX + (curD + 12) * v.x;
+                let headY = crankY + (curD + 12) * v.y;
 
                 sCtx.save();
                 sCtx.translate(headX, headY);
@@ -1167,7 +1190,7 @@
 
                 if (distToTDC < 0.25) {
                     let sparkPower = (0.25 - distToTDC) / 0.25;
-                    let grad = sCtx.createRadialGradient(0, -cylH, 0, 0, -cylH, cylW);
+                    let grad = safeCreateRadialGradient(0, -cylH, 0, 0, -cylH, cylW);
                     grad.addColorStop(0, `rgba(255, 100, 0, ${sparkPower * 0.95})`);
                     grad.addColorStop(1, 'transparent');
                     sCtx.fillStyle = grad;
@@ -1226,9 +1249,14 @@
             let vD_c = vc.x * Dx + vc.y * Dy;
             let vD_r = vr.x * Dx + vr.y * Dy;
 
-            let d_l = -vD_l + Math.sqrt(vD_l * vD_l - (R*R - L*L));
-            let d_c = -vD_c + Math.sqrt(vD_c * vD_c - (R*R - L*L));
-            let d_r = -vD_r + Math.sqrt(vD_r * vD_r - (R*R - L*L));
+            let root_l = vD_l * vD_l - (R*R - L*L);
+            let root_c = vD_c * vD_c - (R*R - L*L);
+            let root_r = vD_r * vD_r - (R*R - L*L);
+            if(root_l < 0 || root_c < 0 || root_r < 0) return;
+
+            let d_l = -vD_l + Math.sqrt(root_l);
+            let d_c = -vD_c + Math.sqrt(root_c);
+            let d_r = -vD_r + Math.sqrt(root_r);
 
             let pl = { x: centerX + d_l * vl.x, y: crankY + d_l * vl.y };
             let pc = { x: centerX + d_c * vc.x, y: crankY + d_c * vc.y };
@@ -1237,9 +1265,9 @@
             let cylW = 10;
             let cylH = 40;
 
-            function drawBank(p, v, angleOffset) {
-                let headX = centerX + (d_l + 10) * v.x;
-                let headY = crankY + (d_l + 10) * v.y;
+            function drawBank(p, v, angleOffset, curD) {
+                let headX = centerX + (curD + 10) * v.x;
+                let headY = crankY + (curD + 10) * v.y;
 
                 sCtx.save();
                 sCtx.translate(headX, headY);
@@ -1263,7 +1291,7 @@
 
                 if (distToTDC < 0.25) {
                     let sparkPower = (0.25 - distToTDC) / 0.25;
-                    let grad = sCtx.createRadialGradient(0, -cylH, 0, 0, -cylH, cylW);
+                    let grad = safeCreateRadialGradient(0, -cylH, 0, 0, -cylH, cylW);
                     grad.addColorStop(0, `rgba(255, 100, 0, ${sparkPower * 0.95})`);
                     grad.addColorStop(1, 'transparent');
                     sCtx.fillStyle = grad;
@@ -1297,9 +1325,9 @@
                 sCtx.restore();
             }
 
-            drawBank(pl, vl, -phi);
-            drawBank(pc, vc, 0);
-            drawBank(pr, vr, phi);
+            drawBank(pl, vl, -phi, d_l);
+            drawBank(pc, vc, 0, d_c);
+            drawBank(pr, vr, phi, d_r);
 
             sCtx.fillStyle = '#00E5FF';
             sCtx.beginPath();
@@ -1470,7 +1498,7 @@
                 sCtx.lineTo(simWidth*0.55, simHeight*0.62);
                 sCtx.stroke();
 
-                let grad = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.52, simWidth*0.5, simHeight*0.9);
+                let grad = safeCreateLinearGradient(simWidth*0.5, simHeight*0.52, simWidth*0.5, simHeight*0.9);
                 grad.addColorStop(0, 'rgba(255, 180, 0, 0.85)');
                 grad.addColorStop(0.3, 'rgba(255, 80, 0, 0.55)');
                 grad.addColorStop(0.7, 'rgba(0, 229, 255, 0.2)');
@@ -1483,7 +1511,7 @@
                 sCtx.lineTo(simWidth*0.51, simHeight*0.52);
                 sCtx.fill();
 
-                let chamberGrad = sCtx.createRadialGradient(simWidth*0.5, simHeight*0.44, 1, simWidth*0.5, simHeight*0.44, 15);
+                let chamberGrad = safeCreateRadialGradient(simWidth*0.5, simHeight*0.44, 1, simWidth*0.5, simHeight*0.44, 15);
                 chamberGrad.addColorStop(0, '#FFFFFF');
                 chamberGrad.addColorStop(0.5, '#FF6B00');
                 chamberGrad.addColorStop(1, 'transparent');
@@ -1534,13 +1562,18 @@
                 sCtx.fillRect(simWidth*0.425, simHeight*0.16, simWidth*0.045, simHeight*0.37);
                 sCtx.fillRect(simWidth*0.53, simHeight*0.16, simWidth*0.045, simHeight*0.37);
 
-                sCtx.strokeStyle = '#FF6B00';
-                sCtx.lineWidth = 2;
+                // Thermal grain border strokes (no complex, expensive shadow blur filters)
+                sCtx.strokeStyle = '#FF4500';
+                sCtx.lineWidth = 2.5;
                 sCtx.beginPath();
                 sCtx.moveTo(simWidth*0.47, simHeight*0.16);
                 sCtx.lineTo(simWidth*0.47, simHeight*0.53);
                 sCtx.moveTo(simWidth*0.53, simHeight*0.16);
                 sCtx.lineTo(simWidth*0.53, simHeight*0.53);
+                sCtx.stroke();
+
+                sCtx.strokeStyle = '#FF8C00';
+                sCtx.lineWidth = 1;
                 sCtx.stroke();
 
                 sCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
@@ -1552,14 +1585,14 @@
                 sCtx.lineTo(simWidth*0.57, simHeight*0.64);
                 sCtx.stroke();
 
-                let flameGrad = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.16, simWidth*0.5, simHeight*0.55);
+                let flameGrad = safeCreateLinearGradient(simWidth*0.5, simHeight*0.16, simWidth*0.5, simHeight*0.55);
                 flameGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
                 flameGrad.addColorStop(0.5, 'rgba(255, 100, 0, 0.6)');
                 flameGrad.addColorStop(1, '#FF4500');
-                flameGrad.fillStyle = flameGrad;
-                flameGrad.fillRect(simWidth*0.472, simHeight*0.16, simWidth*0.056, simHeight*0.37);
+                sCtx.fillStyle = flameGrad;
+                sCtx.fillRect(simWidth*0.472, simHeight*0.16, simWidth*0.056, simHeight*0.37);
 
-                let exhaustGrad = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.55, simWidth*0.5, simHeight*0.9);
+                let exhaustGrad = safeCreateLinearGradient(simWidth*0.5, simHeight*0.55, simWidth*0.5, simHeight*0.9);
                 exhaustGrad.addColorStop(0, '#FFFFFF');
                 exhaustGrad.addColorStop(0.2, '#FFA500');
                 exhaustGrad.addColorStop(0.5, 'rgba(100, 100, 100, 0.4)');
@@ -1572,18 +1605,18 @@
                 sCtx.lineTo(simWidth*0.53, simHeight*0.55);
                 sCtx.fill();
 
-                for (let k = 0; k < 2; k++) {
-                    if (Math.random() < 0.7) {
+                for (let k = 0; k < 3; k++) {
+                    if (Math.random() < 0.8) {
                         exhaustParticles.push({
                             x: simWidth * 0.5 + (Math.random() - 0.5) * 16,
                             y: simHeight * 0.55 + Math.random() * 5,
                             vx: (Math.random() - 0.5) * 4,
                             vy: Math.random() * 5 + 4,
-                            size: Math.random() * 8 + 3,
-                            alpha: 0.85,
-                            decay: 0.98,
-                            alphaDecay: 0.025,
-                            color: Math.random() < 0.4 ? 'rgba(120, 120, 120, 0.5)' : '#FF5F00'
+                            size: Math.random() * 10 + 4,
+                            alpha: 0.9,
+                            decay: 0.97,
+                            alphaDecay: 0.015,
+                            color: Math.random() < 0.5 ? 'rgba(100, 100, 100, 0.45)' : '#FF5F00'
                         });
                     }
                 }
@@ -1621,7 +1654,7 @@
                 sCtx.lineTo(simWidth*0.56, simHeight*0.63);
                 sCtx.stroke();
 
-                let gradientEx = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.55, simWidth*0.5, simHeight*0.9);
+                let gradientEx = safeCreateLinearGradient(simWidth*0.5, simHeight*0.55, simWidth*0.5, simHeight*0.9);
                 gradientEx.addColorStop(0, '#FFA500');
                 gradientEx.addColorStop(0.4, 'rgba(255, 50, 0, 0.4)');
                 gradientEx.addColorStop(1, 'transparent');
@@ -1668,7 +1701,7 @@
                 sCtx.fillText("ANODE GRID", simWidth*0.35, simHeight*0.36);
                 sCtx.fillText("CATHODE GRID", simWidth*0.34, simHeight*0.43);
 
-                let plasma = sCtx.createRadialGradient(simWidth*0.5, simHeight*0.31, 2, simWidth*0.5, simHeight*0.31, 22);
+                let plasma = safeCreateRadialGradient(simWidth*0.5, simHeight*0.31, 2, simWidth*0.5, simHeight*0.31, 22);
                 plasma.addColorStop(0, 'rgba(0, 229, 255, 0.55)');
                 plasma.addColorStop(0.7, 'rgba(155, 140, 255, 0.2)');
                 plasma.addColorStop(1, 'transparent');
@@ -1677,7 +1710,7 @@
                 sCtx.arc(simWidth*0.5, simHeight*0.31, 22, 0, Math.PI*2);
                 sCtx.fill();
 
-                let beam = sCtx.createLinearGradient(simWidth*0.5, simHeight*0.47, simWidth*0.5, simHeight*0.9);
+                let beam = safeCreateLinearGradient(simWidth*0.5, simHeight*0.47, simWidth*0.5, simHeight*0.9);
                 beam.addColorStop(0, 'rgba(0, 229, 255, 0.7)');
                 beam.addColorStop(0.3, 'rgba(155, 140, 255, 0.35)');
                 beam.addColorStop(1, 'transparent');
@@ -1761,7 +1794,7 @@
 
                 let combustorX = casingXStart + 125;
                 let combustorW = 50;
-                let gradComb = sCtx.createRadialGradient(combustorX + combustorW/2, coreY, 2, combustorX + combustorW/2, coreY, 30);
+                let gradComb = safeCreateRadialGradient(combustorX + combustorW/2, coreY, 2, combustorX + combustorW/2, coreY, 30);
                 gradComb.addColorStop(0, '#FFFFFF');
                 gradComb.addColorStop(0.5, '#FF6B00');
                 gradComb.addColorStop(1, 'transparent');
@@ -1771,7 +1804,7 @@
                 sCtx.arc(combustorX + combustorW/2, coreY + 20, 16, 0, Math.PI*2);
                 sCtx.fill();
 
-                let gradPlume = sCtx.createLinearGradient(casingXEnd - 20, coreY, casingXEnd + 80, coreY);
+                let gradPlume = safeCreateLinearGradient(casingXEnd - 20, coreY, casingXEnd + 80, coreY);
                 gradPlume.addColorStop(0, 'rgba(255, 120, 0, 0.8)');
                 gradPlume.addColorStop(0.4, 'rgba(255, 40, 0, 0.4)');
                 gradPlume.addColorStop(1, 'transparent');
@@ -1830,7 +1863,7 @@
                 drawSpinningBlades(casingXStart - 10, coreY, casingHeight + 8, 8, rotateFan);
                 drawSpinningBlades(casingXStart + 50, coreY, 15, 5, rotateFan * 1.2);
 
-                let gComb = sCtx.createRadialGradient(casingXStart + 130, coreY, 1, casingXStart + 130, coreY, 14);
+                let gComb = safeCreateRadialGradient(casingXStart + 130, coreY, 1, casingXStart + 130, coreY, 14);
                 gComb.addColorStop(0, '#FFFFFF');
                 gComb.addColorStop(0.6, '#FF5F00');
                 gComb.addColorStop(1, 'transparent');
@@ -1839,7 +1872,7 @@
                 sCtx.arc(casingXStart + 130, coreY, 14, 0, Math.PI*2);
                 sCtx.fill();
 
-                let gPlume = sCtx.createLinearGradient(casingXEnd - 70, coreY, casingXEnd + 50, coreY);
+                let gPlume = safeCreateLinearGradient(casingXEnd - 70, coreY, casingXEnd + 50, coreY);
                 gPlume.addColorStop(0, 'rgba(255, 70, 0, 0.7)');
                 gPlume.addColorStop(1, 'transparent');
                 sCtx.fillStyle = gPlume;
@@ -1916,7 +1949,7 @@
                 drawSpinningBlades(casingXStart + 55, coreY, 12, 5, simTime * 1.5);
                 drawSpinningBlades(casingXStart + 150, coreY, 12, 5, simTime * 1.5);
 
-                let propPlume = sCtx.createLinearGradient(casingXStart + 200, coreY, casingXStart + 260, coreY);
+                let propPlume = safeCreateLinearGradient(casingXStart + 200, coreY, casingXStart + 260, coreY);
                 propPlume.addColorStop(0, 'rgba(255, 60, 0, 0.5)');
                 propPlume.addColorStop(1, 'transparent');
                 sCtx.fillStyle = propPlume;
@@ -1960,7 +1993,7 @@
                 sCtx.lineTo(casingXStart, coreY + casingHeight + 6);
                 sCtx.stroke();
 
-                let ramPlume = sCtx.createLinearGradient(casingXStart + 140, coreY, casingXEnd, coreY);
+                let ramPlume = safeCreateLinearGradient(casingXStart + 140, coreY, casingXEnd, coreY);
                 ramPlume.addColorStop(0, '#FFFFFF');
                 ramPlume.addColorStop(0.3, '#FF6F00');
                 ramPlume.addColorStop(1, 'transparent');
@@ -2020,17 +2053,17 @@
                 sCtx.lineTo(casingXStart + 240, coreY + 12);
                 sCtx.stroke();
 
-                let scramGlow = sCtx.createLinearGradient(casingXStart + 160, coreY, casingXEnd + 80, coreY);
+                let scramGlow = safeCreateLinearGradient(casingXStart + 180, coreY, casingXEnd + 80, coreY);
                 scramGlow.addColorStop(0, '#FFFFFF');
                 scramGlow.addColorStop(0.2, '#00E5FF');
                 scramGlow.addColorStop(0.5, '#FF3C00');
                 scramGlow.addColorStop(1, 'transparent');
                 sCtx.fillStyle = scramGlow;
-                sCtx.fillRect(casingXStart + 160, coreY - 10, 160, 20);
+                sCtx.fillRect(casingXStart + 180, coreY - 10, 160, 20);
 
                 if (Math.random() < 0.7) {
                     exhaustParticles.push({
-                        x: casingXStart + 160,
+                        x: casingXStart + 180,
                         y: coreY + (Math.random() - 0.5) * 14,
                         vx: Math.random() * 10 + 8,
                         vy: 0,
@@ -2046,6 +2079,15 @@
 
         // --- UNIFIED SIMULATION DRAW MASTER ---
         function drawSandbox() {
+            // Absolute context sanitization at start of render to prevent bleeding
+            sCtx.setLineDash([]);
+            sCtx.shadowBlur = 0;
+            sCtx.shadowColor = 'transparent';
+            sCtx.globalAlpha = 1.0;
+            sCtx.textAlign = 'center';
+            sCtx.textBaseline = 'middle';
+            sCtx.lineWidth = 1;
+
             sCtx.fillStyle = '#020306';
             sCtx.fillRect(0, 0, simWidth, simHeight);
 
