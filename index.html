@@ -118,6 +118,27 @@
             100% { filter: blur(0); opacity: 1; }
         }
 
+        /* PREMIUM GRADIENT NAME SHIFTING EFFECT */
+        @keyframes subtleGradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-text-gradient {
+            background: linear-gradient(
+                90deg,
+                #00E5FF, 
+                #14B8A6, 
+                #9b8cff, 
+                #00E5FF
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: subtleGradientFlow 6s ease infinite;
+        }
+
         /* ============================================
            MOBILE OPTIMIZATIONS
            ============================================ */
@@ -768,7 +789,7 @@
         </section>
 
         <!-- SYSTEM CORE FOOTER -->
-        <footer class="border-t border-white/5 bg-[#040608] py-12 px-6 lg:px-16 relative z-20">
+        <footer class="border-t border-white/5 bg-[#040608] py-12 px-6 lg:px-16 relative z-20 pb-24 sm:pb-16">
             <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
                 <div class="flex items-center gap-2.5 text-[9px] font-mono tracking-[0.25em] text-white/30 uppercase">
                     <span class="w-1.5 h-1.5 rounded-full bg-primaryCyan/55 animate-ping"></span>
@@ -776,7 +797,7 @@
                 </div>
                 <div class="text-[11px] font-space tracking-wide text-white/40 flex flex-wrap items-center justify-center gap-1.5">
                     <span>Website crafted with precision by</span>
-                    <a href="https://tawsif-dev.vercel.app" target="_blank" rel="noopener noreferrer" class="relative font-bold text-white hover:text-primaryCyan transition-colors duration-300 group">
+                    <a href="https://tawsif-dev.vercel.app" target="_blank" rel="noopener noreferrer" class="relative font-bold animate-text-gradient group">
                         Md Abu Tawsif
                         <span class="absolute bottom-[-1px] left-0 w-full h-[1px] bg-gradient-to-r from-primaryCyan to-secondaryTeal transform scale-x-50 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                     </a>
@@ -996,13 +1017,29 @@
         });
 
         window.addEventListener('resize',()=>{const a=document.querySelector('.nav-link.text-white');if(a)positionIndicator(a);});
+        
+        // Active scroll monitoring & Nav shift at bottom
         window.addEventListener('scroll',()=>{
             let current='';
-            sections.forEach(s=>{if(pageYOffset>=s.offsetTop-220)current=s.getAttribute('id');});
+            const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+            sections.forEach(s=>{if(scrollY>=s.offsetTop-220)current=s.getAttribute('id');});
             navLinks.forEach(l=>{
                 l.classList.remove('text-white');l.classList.add('text-white/50');
                 if(l.getAttribute('data-target')===current){l.classList.add('text-white');l.classList.remove('text-white/50');positionIndicator(l);}
             });
+
+            // If user reaches the very bottom, shift navigation up to clear footer space
+            const navBar = document.querySelector('nav');
+            if (navBar) {
+                const isAtBottom = (window.innerHeight + scrollY) >= (document.documentElement.scrollHeight - 65);
+                if (isAtBottom) {
+                    navBar.classList.remove('bottom-6');
+                    navBar.classList.add('bottom-20');
+                } else {
+                    navBar.classList.remove('bottom-20');
+                    navBar.classList.add('bottom-6');
+                }
+            }
         });
 
         // Loader
