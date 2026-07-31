@@ -31,7 +31,76 @@
     
     <style>
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #040608; }
+        ::-webkit-scrollbar-track { background: #040608; }<div style="
+              padding: 20px 10px;
+              text-align: center;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background-color: #0d0f12;
+              border-top: 1px solid rgba(255, 255, 255, 0.1);
+              box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+            ">
+              <!-- Keyframe Animations Inlined -->
+              <style>
+                @keyframes colorGlow {
+                  0% {
+                    color: #ff007f;
+                    text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+                  }
+                  25% {
+                    color: #00d2ff;
+                    text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
+                  }
+                  50% {
+                    color: #00ff87;
+                    text-shadow: 0 0 10px #00ff87, 0 0 20px #00ff87;
+                  }
+                  75% {
+                    color: #9d00ff;
+                    text-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff;
+                  }
+                  100% {
+                    color: #ff007f;
+                    text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+                  }
+                }
+            
+                @keyframes subtlePulse {
+                  0%, 100% {
+                    transform: translateY(0px) scale(1);
+                  }
+                  50% {
+                    transform: translateY(-3px) scale(1.03);
+                  }
+                }
+            
+                .glow-link {
+                  display: inline-block;
+                  text-decoration: none;
+                  font-weight: bold;
+                  animation: colorGlow 6s infinite linear, subtlePulse 3s infinite ease-in-out;
+                  transition: transform 0.2s ease;
+                }
+            
+                .glow-link:hover {
+                  transform: scale(1.1) translateY(-5px) !important;
+                }
+              </style>
+            
+              <p style="
+                margin: 0;
+                font-size: 1rem;
+                color: #e0e0e0;
+                letter-spacing: 0.5px;
+              ">
+                Website created by 
+                <a href="https://tawsif-dev.vercel.app" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="glow-link">
+                   Md Abu Tawsif
+                </a>
+              </p>
+            </div>
         ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.25); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.7); }
 
@@ -766,76 +835,76 @@
                 </div>
             </div>
         </section>
-            <div style="
-              padding: 20px 10px;
-              text-align: center;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              background-color: #0d0f12;
-              border-top: 1px solid rgba(255, 255, 255, 0.1);
-              box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-            ">
-              <!-- Keyframe Animations Inlined -->
-              <style>
-                @keyframes colorGlow {
-                  0% {
-                    color: #ff007f;
-                    text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
-                  }
-                  25% {
-                    color: #00d2ff;
-                    text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
-                  }
-                  50% {
-                    color: #00ff87;
-                    text-shadow: 0 0 10px #00ff87, 0 0 20px #00ff87;
-                  }
-                  75% {
-                    color: #9d00ff;
-                    text-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff;
-                  }
-                  100% {
-                    color: #ff007f;
-                    text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
-                  }
-                }
-            
-                @keyframes subtlePulse {
-                  0%, 100% {
-                    transform: translateY(0px) scale(1);
-                  }
-                  50% {
-                    transform: translateY(-3px) scale(1.03);
-                  }
-                }
-            
-                .glow-link {
-                  display: inline-block;
-                  text-decoration: none;
-                  font-weight: bold;
-                  animation: colorGlow 6s infinite linear, subtlePulse 3s infinite ease-in-out;
-                  transition: transform 0.2s ease;
-                }
-            
-                .glow-link:hover {
-                  transform: scale(1.1) translateY(-5px) !important;
-                }
-              </style>
-            
-              <p style="
-                margin: 0;
-                font-size: 1rem;
-                color: #e0e0e0;
-                letter-spacing: 0.5px;
-              ">
-                Website created by 
-                <a href="https://tawsif-dev.vercel.app" 
-                   target="_blank" 
-                   rel="noopener noreferrer" 
-                   class="glow-link">
-                   Md Abu Tawsif
-                </a>
-              </p>
-            </div>
+        <div style="
+          padding: 20px 10px;
+          text-align: center;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #0d0f12;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        ">
+          <!-- Keyframe Animations Inlined -->
+          <style>
+            @keyframes colorGlow {
+              0% {
+                color: #ff007f;
+                text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+              }
+              25% {
+                color: #00d2ff;
+                text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
+              }
+              50% {
+                color: #00ff87;
+                text-shadow: 0 0 10px #00ff87, 0 0 20px #00ff87;
+              }
+              75% {
+                color: #9d00ff;
+                text-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff;
+              }
+              100% {
+                color: #ff007f;
+                text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+              }
+            }
+        
+            @keyframes subtlePulse {
+              0%, 100% {
+                transform: translateY(0px) scale(1);
+              }
+              50% {
+                transform: translateY(-3px) scale(1.03);
+              }
+            }
+        
+            .glow-link {
+              display: inline-block;
+              text-decoration: none;
+              font-weight: bold;
+              animation: colorGlow 6s infinite linear, subtlePulse 3s infinite ease-in-out;
+              transition: transform 0.2s ease;
+            }
+        
+            .glow-link:hover {
+              transform: scale(1.1) translateY(-5px) !important;
+            }
+          </style>
+        
+          <p style="
+            margin: 0;
+            font-size: 1rem;
+            color: #e0e0e0;
+            letter-spacing: 0.5px;
+          ">
+            Website created by 
+            <a href="https://tawsif-dev.vercel.app" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="glow-link">
+               Md Abu Tawsif
+            </a>
+          </p>
+        </div>
     </main>
 
     <!-- Book Modal -->
