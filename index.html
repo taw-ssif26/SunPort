@@ -119,6 +119,94 @@
         }
 
         /* ============================================
+           PROJECT GALLERY / LIGHTBOX
+           ============================================ */
+        .project-thumb { cursor: pointer; }
+        .project-thumb .gallery-badge {
+            position: absolute; bottom: 8px; right: 8px;
+            font-size: 8px; font-family: 'Space Grotesk', monospace; letter-spacing: .08em;
+            background: rgba(4, 6, 8, 0.75); color: #00E5FF;
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            padding: 3px 7px; border-radius: 4px;
+            pointer-events: none; text-transform: uppercase;
+            z-index: 10;
+        }
+        .project-thumb::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.35), transparent 40%);
+            opacity: 0; transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .project-thumb:hover::after { opacity: 1; }
+
+        #lightbox {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(2, 3, 6, 0.94);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.25s ease;
+            padding: 1.5rem;
+        }
+        #lightbox.open { display: flex; opacity: 1; }
+        #lightbox-stage {
+            position: relative;
+            width: min(92vw, 980px);
+            max-height: 88vh;
+        }
+        #lightbox-img {
+            width: 100%; max-height: 72vh;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #06090c;
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.7);
+            cursor: pointer;
+        }
+        #lightbox-meta {
+            margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-family: 'Space Grotesk', monospace; font-size: 10px; letter-spacing: .1em;
+            color: rgba(255, 255, 255, 0.4); text-transform: uppercase;
+        }
+        #lightbox-caption { color: rgba(255,255,255,0.6); }
+        .lb-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 44px; height: 44px; border-radius: 999px;
+            background: rgba(4, 6, 8, 0.7);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            color: #00E5FF; font-size: 20px; line-height: 1; font-family: 'Space Grotesk', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; user-select: none;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .lb-nav:hover { background: rgba(0, 229, 255, 0.12); border-color: rgba(0, 229, 255, 0.5); box-shadow: 0 0 15px rgba(0,229,255,0.15); }
+        #lb-prev { left: -8px; }
+        #lb-next { right: -8px; }
+        @media (min-width: 768px) {
+            #lb-prev { left: -60px; }
+            #lb-next { right: -60px; }
+        }
+        #lb-close {
+            position: absolute; top: -42px; right: 0;
+            font-family: 'Space Grotesk', monospace; font-size: 10px; letter-spacing: .15em;
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 7px 12px; border-radius: 6px;
+            cursor: pointer; text-transform: uppercase;
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+        #lb-close:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+        #lb-dots {
+            display: flex; gap: 6px; justify-content: center; margin-top: 14px;
+        }
+        .lb-dot {
+            width: 6px; height: 6px; border-radius: 999px;
+            background: rgba(255,255,255,0.18);
+            cursor: pointer; transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .lb-dot.active { background: #00E5FF; transform: scale(1.3); box-shadow: 0 0 6px rgba(0,229,255,0.6); }
+
+        /* ============================================
            MOBILE OPTIMIZATIONS
            ============================================ */
 
@@ -553,8 +641,14 @@
                     
                     <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3">
+                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
+                                 data-gallery='[
+                                    {"src":"assets/sfc.jpeg","caption":"Science For Champs"},
+                                    {"src":"assets/sfc-2.jpeg","caption":"Science For Champs"},
+                                    {"src":"assets/sfc-3.jpeg","caption":"Science For Champs"}
+                                 ]'>
                                 <img src="assets/sfc.jpeg" alt="Science For Champs" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
+                                <span class="gallery-badge">3 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Social Impact</span>
@@ -571,8 +665,13 @@
         
                     <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group"
+                                 data-gallery='[
+                                    {"src":"assets/biggandda-1.jpeg","caption":"BigganAdda"},
+                                    {"src":"assets/biggandda-2.jpeg","caption":"BigganAdda"}
+                                 ]'>
                                 <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🎙️</span>
+                                <span class="gallery-badge">2 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Communication</span>
@@ -589,8 +688,14 @@
         
                     <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3">
+                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
+                                 data-gallery='[
+                                    {"src":"assets/bbc.jpeg","caption":"Byte Camp"},
+                                    {"src":"assets/bbc-2.jpeg","caption":"Byte Camp"},
+                                    {"src":"assets/bbc-3.jpeg","caption":"Byte Camp"}
+                                 ]'>
                                 <img src="assets/bbc.jpeg" alt="Byte Camp" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
+                                <span class="gallery-badge">3 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Technology</span>
@@ -607,8 +712,13 @@
         
                     <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3">
+                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
+                                 data-gallery='[
+                                    {"src":"assets/bcn.jpeg","caption":"Bigganmona Webinar"},
+                                    {"src":"assets/bcn-2.jpeg","caption":"Bigganmona Webinar"}
+                                 ]'>
                                 <img src="assets/bcn.jpeg" alt="Bigganmona Webinar" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
+                                <span class="gallery-badge">2 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Web Portal</span>
@@ -625,8 +735,14 @@
         
                     <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3">
+                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
+                                 data-gallery='[
+                                    {"src":"assets/bigganmona.jpeg","caption":"Knowledge Camp"},
+                                    {"src":"assets/kc-2.jpeg","caption":"Knowledge Camp"},
+                                    {"src":"assets/kc-3.jpeg","caption":"Knowledge Camp"}
+                                 ]'>
                                 <img src="assets/bigganmona.jpeg" alt="Knowledge Camp" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
+                                <span class="gallery-badge">3 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Research</span>
@@ -643,8 +759,13 @@
         
                     <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group">
+                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group"
+                                 data-gallery='[
+                                    {"src":"assets/scinerds-1.jpeg","caption":"SciNerds Quiz"},
+                                    {"src":"assets/scinerds-2.jpeg","caption":"SciNerds Quiz"}
+                                 ]'>
                                 <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🏆</span>
+                                <span class="gallery-badge">2 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Olympiad</span>
@@ -855,6 +976,21 @@
                 <a href="https://www.rokomari.com/book/225140/mojar-torit" target="_blank" class="px-5 py-2.5 bg-primaryCyan text-cosmicBg font-wide text-[9px] tracking-wider rounded uppercase font-bold hover:bg-white transition-colors text-center">Acquire Textbook</a>
                 <button onclick="closeBookModal()" class="px-5 py-2.5 border border-white/10 text-white font-wide text-[9px] tracking-wider rounded uppercase hover:border-white/30 transition-colors text-center">Terminate Scan</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Project Gallery Lightbox (single shared instance for every project card) -->
+    <div id="lightbox" role="dialog" aria-modal="true" aria-label="Project image gallery">
+        <div id="lightbox-stage">
+            <div id="lb-close">Close ✕</div>
+            <div id="lb-prev" class="lb-nav">‹</div>
+            <img id="lightbox-img" src="" alt="">
+            <div id="lb-next" class="lb-nav">›</div>
+            <div id="lightbox-meta">
+                <span id="lightbox-counter"></span>
+                <span id="lightbox-caption"></span>
+            </div>
+            <div id="lb-dots"></div>
         </div>
     </div>
 
@@ -1089,6 +1225,90 @@
             m.classList.add('opacity-0');setTimeout(()=>m.classList.add('hidden'),300);
         }
         window.addEventListener('keydown',e=>{if(e.key==='Escape')closeBookModal();});
+
+        // ============================================
+        // PROJECT GALLERY LIGHTBOX
+        // ============================================
+        (function initProjectLightbox() {
+            let currentImages = [];
+            let currentIndex = 0;
+
+            const lightbox = document.getElementById('lightbox');
+            const imgEl = document.getElementById('lightbox-img');
+            const counterEl = document.getElementById('lightbox-counter');
+            const captionEl = document.getElementById('lightbox-caption');
+            const dotsEl = document.getElementById('lb-dots');
+
+            function render() {
+                const item = currentImages[currentIndex];
+                imgEl.src = item.src;
+                imgEl.alt = item.caption || '';
+                counterEl.textContent = `${currentIndex + 1} / ${currentImages.length}`;
+                captionEl.textContent = item.caption ? `— ${item.caption}` : '';
+                [...dotsEl.children].forEach((d, i) => d.classList.toggle('active', i === currentIndex));
+            }
+
+            function buildDots() {
+                dotsEl.innerHTML = '';
+                if (currentImages.length <= 1) return; // no dots needed for a single image
+                currentImages.forEach((_, i) => {
+                    const dot = document.createElement('div');
+                    dot.className = 'lb-dot';
+                    dot.addEventListener('click', (e) => { e.stopPropagation(); currentIndex = i; render(); });
+                    dotsEl.appendChild(dot);
+                });
+            }
+
+            function openLightbox(images, startIndex) {
+                currentImages = images;
+                currentIndex = startIndex || 0;
+                buildDots();
+                render();
+                lightbox.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                const hasMultiple = currentImages.length > 1;
+                document.getElementById('lb-prev').style.display = hasMultiple ? 'flex' : 'none';
+                document.getElementById('lb-next').style.display = hasMultiple ? 'flex' : 'none';
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            function nextImage() { currentIndex = (currentIndex + 1) % currentImages.length; render(); }
+            function prevImage() { currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length; render(); }
+
+            // Wire every project thumbnail carrying a data-gallery payload
+            document.querySelectorAll('[data-gallery]').forEach(el => {
+                el.addEventListener('click', () => {
+                    try {
+                        const images = JSON.parse(el.getAttribute('data-gallery'));
+                        if (images && images.length) openLightbox(images, 0);
+                    } catch (err) {
+                        console.error('Invalid gallery data on project card:', err);
+                    }
+                });
+            });
+
+            document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
+            document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); prevImage(); });
+            document.getElementById('lb-close').addEventListener('click', closeLightbox);
+
+            // Clicking the main image itself also advances — "click through one after another"
+            imgEl.addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
+
+            // Click outside the stage closes it
+            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+            // Keyboard: Esc closes, arrows navigate
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('open')) return;
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowRight') nextImage();
+                if (e.key === 'ArrowLeft') prevImage();
+            });
+        })();
     </script>
 </body>
 </html>
