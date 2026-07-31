@@ -1,3 +1,5 @@
+--- START OF FILE Paste July 31, 2026 - 7:13PM ---
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -119,189 +121,84 @@
         }
 
         /* ============================================
-           PROJECT GALLERY / LIGHTBOX
-           ============================================ */
-        .project-thumb { cursor: pointer; }
-        .project-thumb .gallery-badge {
-            position: absolute; bottom: 8px; right: 8px;
-            font-size: 8px; font-family: 'Space Grotesk', monospace; letter-spacing: .08em;
-            background: rgba(4, 6, 8, 0.75); color: #00E5FF;
-            border: 1px solid rgba(0, 229, 255, 0.25);
-            padding: 3px 7px; border-radius: 4px;
-            pointer-events: none; text-transform: uppercase;
-            z-index: 10;
-        }
-        .project-thumb::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.35), transparent 40%);
-            opacity: 0; transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        .project-thumb:hover::after { opacity: 1; }
-
-        #lightbox {
-            position: fixed; inset: 0; z-index: 100;
-            background: rgba(2, 3, 6, 0.94);
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-            display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.25s ease;
-            padding: 1.5rem;
-        }
-        #lightbox.open { display: flex; opacity: 1; }
-        #lightbox-stage {
-            position: relative;
-            width: min(92vw, 980px);
-            max-height: 88vh;
-        }
-        #lightbox-img {
-            width: 100%; max-height: 72vh;
-            object-fit: contain;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: #06090c;
-            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.7);
-            cursor: pointer;
-        }
-        #lightbox-meta {
-            margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-family: 'Space Grotesk', monospace; font-size: 10px; letter-spacing: .1em;
-            color: rgba(255, 255, 255, 0.4); text-transform: uppercase;
-        }
-        #lightbox-caption { color: rgba(255,255,255,0.6); }
-        .lb-nav {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            width: 44px; height: 44px; border-radius: 999px;
-            background: rgba(4, 6, 8, 0.7);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            color: #00E5FF; font-size: 20px; line-height: 1; font-family: 'Space Grotesk', sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; user-select: none;
-            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .lb-nav:hover { background: rgba(0, 229, 255, 0.12); border-color: rgba(0, 229, 255, 0.5); box-shadow: 0 0 15px rgba(0,229,255,0.15); }
-        #lb-prev { left: -8px; }
-        #lb-next { right: -8px; }
-        @media (min-width: 768px) {
-            #lb-prev { left: -60px; }
-            #lb-next { right: -60px; }
-        }
-        #lb-close {
-            position: absolute; top: -42px; right: 0;
-            font-family: 'Space Grotesk', monospace; font-size: 10px; letter-spacing: .15em;
-            color: rgba(255,255,255,0.5);
-            border: 1px solid rgba(255,255,255,0.12);
-            padding: 7px 12px; border-radius: 6px;
-            cursor: pointer; text-transform: uppercase;
-            transition: color 0.2s ease, border-color 0.2s ease;
-        }
-        #lb-close:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
-        #lb-dots {
-            display: flex; gap: 6px; justify-content: center; margin-top: 14px;
-        }
-        .lb-dot {
-            width: 6px; height: 6px; border-radius: 999px;
-            background: rgba(255,255,255,0.18);
-            cursor: pointer; transition: background 0.2s ease, transform 0.2s ease;
-        }
-        .lb-dot.active { background: #00E5FF; transform: scale(1.3); box-shadow: 0 0 6px rgba(0,229,255,0.6); }
-
-        /* ============================================
            MOBILE OPTIMIZATIONS
            ============================================ */
 
-        /* Hero name — clamp so it's always visible on any screen width */
         .hero-name-line {
             font-size: clamp(1.6rem, 9vw, 7rem);
             line-height: 1;
             word-break: break-word;
         }
 
-        /* On mobile: center the hero text block, remove excess padding */
         @media (max-width: 767px) {
-            /* Hero section: stack vertically, center everything, give breathing room */
             #home {
                 padding-top: 5rem;
                 padding-bottom: 5rem;
                 min-height: unset;
             }
 
-            /* Remove the displaced orb that was overlapping the name */
             #home .absolute.right-1\/2 {
                 display: none;
             }
 
-            /* Name container: full width, centered */
             #home .col-span-12.lg\\:col-span-9 {
                 text-align: center;
             }
 
-            /* Force both name lines to be centered */
             .particle-build {
                 text-align: center;
             }
 
-            /* "NAHIAN" second line: remove the left offset on mobile */
             .hero-name-line.hero-name-second {
                 padding-left: 0 !important;
                 margin-top: 0.25rem;
             }
 
-            /* Side narrative also centered and readable */
             #home .col-span-12.lg\\:col-span-3 {
                 text-align: center;
                 padding-top: 1rem;
             }
 
-            /* Badge row center */
             #home .flex.items-center.justify-center {
                 justify-content: center !important;
             }
 
-            /* Bottom meta grid: stack on mobile */
             #home .grid.grid-cols-1.md\\:grid-cols-12 {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
             }
 
-            /* CTA button: center on mobile */
             #home .md\\:col-span-4 {
                 align-items: center;
             }
 
-            /* Three identity columns: vertical on mobile */
             #home .grid.grid-cols-1.sm\\:grid-cols-3 {
                 grid-template-columns: 1fr;
                 gap: 1rem;
                 text-align: center;
             }
 
-            /* Timeline: tighter on mobile */
             #experiences .border-l {
                 padding-left: 1.25rem;
                 margin-left: 0.75rem;
             }
 
-            /* Timeline cards: simplify grid on mobile */
             #experiences .glass-hud .grid-cols-1.md\\:grid-cols-12 {
                 display: flex;
                 flex-direction: column;
                 gap: 1rem;
             }
 
-            /* Timeline image: smaller height on mobile */
             #experiences .md\\:col-span-3 {
                 height: 7rem;
                 width: 100%;
                 flex: none;
             }
 
-            /* Project cards: single column already handled by Tailwind, just ensure spacing */
             #projects .grid {
                 gap: 1.25rem;
             }
 
-            /* Books section: vertical stack */
             #books .flex.flex-col.sm\\:flex-row {
                 flex-direction: column;
             }
@@ -313,23 +210,19 @@
                 width: 100%;
             }
 
-            /* Simulation canvas: taller on mobile for usability */
             #sandbox .aspect-\\[21\\/9\\] {
                 aspect-ratio: 4 / 3;
             }
 
-            /* Contact: reduce padding */
             #contact .glass-hud {
                 padding: 1.5rem;
             }
 
-            /* Header: simplify on mobile */
             header {
                 padding: 1rem 1rem;
             }
         }
 
-        /* Small phones (≤390px) — extra tight */
         @media (max-width: 390px) {
             .hero-name-line {
                 font-size: clamp(1.4rem, 8.5vw, 2.5rem);
@@ -392,7 +285,6 @@
         <!-- 1. HOME SECTION -->
         <section id="home" class="min-h-[90vh] relative flex flex-col justify-between pt-16 sm:pt-24 pb-16 px-6 lg:px-16 overflow-hidden section-anchor">
             
-            <!-- Cosmic Orb — hidden on mobile via CSS -->
             <div class="absolute right-1/2 translate-x-1/2 top-[10%] lg:right-[5%] lg:top-[15%] lg:translate-x-0 w-64 h-64 sm:w-72 sm:h-72 lg:w-96 lg:h-96 rounded-full bg-gradient-to-tr from-primaryCyan/10 via-blue-950/5 to-transparent pointer-events-none -z-10 blur-[1px] opacity-35 lg:opacity-100">
                 <div class="absolute inset-0 rounded-full border border-primaryCyan/10 animate-[spin_60s_linear_infinite]"></div>
                 <div class="absolute inset-8 rounded-full border border-dashed border-white/5 animate-[spin_30s_linear_infinite_reverse]"></div>
@@ -409,13 +301,11 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                     
                     <div class="col-span-12 lg:col-span-9 relative text-center lg:text-left">
-                        <!-- Upper metadata -->
                         <div class="flex items-center justify-center lg:justify-start gap-3 mb-6">
                             <span class="w-12 h-[1px] bg-primaryCyan/55"></span>
                             <span class="text-[9px] tracking-[0.4em] font-wide uppercase text-primaryCyan animate-pulse">ELECTRODYNAMICS LAB v1.02</span>
                         </div>
 
-                        <!-- Name — using clamp-based hero-name-line class -->
                         <div class="space-y-1 select-none particle-build">
                             <h1 class="hero-name-line font-wide tracking-wide uppercase text-white leading-none">
                                 SABID UDDIN
@@ -426,7 +316,6 @@
                         </div>
                     </div>
 
-                    <!-- Side Profile Narrative -->
                     <div class="col-span-12 lg:col-span-3 lg:pt-16 space-y-4 text-center lg:text-left">
                         <p class="text-xs sm:text-sm text-white/50 tracking-wider leading-relaxed font-light max-w-md mx-auto lg:max-w-none">
                             Theoretical physicist, science communicator, and humanitarian serving as the Chairman of Bigganmona. Operating at the intersection of electrostatic mechanics and young-adult educational systems.
@@ -639,16 +528,12 @@
         
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                    <!-- Project Card 1 (Multi-image active) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt project-card cursor-pointer" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
-                                 data-gallery='[
-                                    {"src":"assets/sfc.jpeg","caption":"Science For Champs"},
-                                    {"src":"assets/sfc-2.jpeg","caption":"Science For Champs"},
-                                    {"src":"assets/sfc-3.jpeg","caption":"Science For Champs"}
-                                 ]'>
+                            <!-- Add image paths here inside data-project-images (comma separated) -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3" data-project-images="assets/sfc.jpeg, assets/bigganmona.jpeg">
                                 <img src="assets/sfc.jpeg" alt="Science For Champs" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
-                                <span class="gallery-badge">3 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Social Impact</span>
@@ -663,15 +548,12 @@
                         </div>
                     </div>
         
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                    <!-- Project Card 2 (Multi-image active) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt project-card cursor-pointer" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group"
-                                 data-gallery='[
-                                    {"src":"assets/biggandda-1.jpeg","caption":"BigganAdda"},
-                                    {"src":"assets/biggandda-2.jpeg","caption":"BigganAdda"}
-                                 ]'>
+                            <!-- Emojis, paths, or placeholders can go here in sequence -->
+                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group" data-project-images="🎙️, 🎧, 📻">
                                 <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🎙️</span>
-                                <span class="gallery-badge">2 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Communication</span>
@@ -686,16 +568,11 @@
                         </div>
                     </div>
         
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                    <!-- Project Card 3 (Multi-image active) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt project-card cursor-pointer" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
-                                 data-gallery='[
-                                    {"src":"assets/bbc.jpeg","caption":"Byte Camp"},
-                                    {"src":"assets/bbc-2.jpeg","caption":"Byte Camp"},
-                                    {"src":"assets/bbc-3.jpeg","caption":"Byte Camp"}
-                                 ]'>
+                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3" data-project-images="assets/bbc.jpeg, assets/wiki.jpeg">
                                 <img src="assets/bbc.jpeg" alt="Byte Camp" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
-                                <span class="gallery-badge">3 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Technology</span>
@@ -710,15 +587,11 @@
                         </div>
                     </div>
         
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                    <!-- Project Card 4 (Multi-image active) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt project-card cursor-pointer" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
-                                 data-gallery='[
-                                    {"src":"assets/bcn.jpeg","caption":"Bigganmona Webinar"},
-                                    {"src":"assets/bcn-2.jpeg","caption":"Bigganmona Webinar"}
-                                 ]'>
+                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3" data-project-images="assets/bcn.jpeg, assets/3zero.jpeg">
                                 <img src="assets/bcn.jpeg" alt="Bigganmona Webinar" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
-                                <span class="gallery-badge">2 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Web Portal</span>
@@ -733,16 +606,11 @@
                         </div>
                     </div>
         
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                    <!-- Project Card 5 (Multi-image active) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt project-card cursor-pointer" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3"
-                                 data-gallery='[
-                                    {"src":"assets/bigganmona.jpeg","caption":"Knowledge Camp"},
-                                    {"src":"assets/kc-2.jpeg","caption":"Knowledge Camp"},
-                                    {"src":"assets/kc-3.jpeg","caption":"Knowledge Camp"}
-                                 ]'>
+                            <div class="w-full aspect-video bg-gradient-to-br from-primaryCyan/10 via-cyan-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group p-3" data-project-images="assets/bigganmona.jpeg, assets/btv.jpeg">
                                 <img src="assets/bigganmona.jpeg" alt="Knowledge Camp" class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300">
-                                <span class="gallery-badge">3 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-primaryCyan bg-primaryCyan/10 px-2.5 py-1 rounded border border-primaryCyan/10 uppercase tracking-wider">Research</span>
@@ -757,15 +625,11 @@
                         </div>
                     </div>
         
-                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt" onmousemove="updateMouseCoords(event, this)">
+                    <!-- Project Card 6 (Multi-image active) -->
+                    <div class="glass-hud p-6 rounded-2xl flex flex-col justify-between glass-hud-inner hover-tilt project-card cursor-pointer" onmousemove="updateMouseCoords(event, this)">
                         <div class="space-y-4">
-                            <div class="project-thumb w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group"
-                                 data-gallery='[
-                                    {"src":"assets/scinerds-1.jpeg","caption":"SciNerds Quiz"},
-                                    {"src":"assets/scinerds-2.jpeg","caption":"SciNerds Quiz"}
-                                 ]'>
+                            <div class="w-full aspect-video bg-gradient-to-br from-secondaryTeal/10 via-teal-950/20 to-transparent border border-white/5 rounded-xl flex items-center justify-center relative overflow-hidden group" data-project-images="🏆, 🎯, 🧠">
                                 <span class="text-2xl opacity-40 group-hover:scale-110 transition-transform">🏆</span>
-                                <span class="gallery-badge">2 photos</span>
                             </div>
                             <div class="flex justify-between items-start">
                                 <span class="text-[8px] font-mono text-secondaryTeal bg-[#14B8A6]/10 px-2.5 py-1 rounded border border-[#14B8A6]/10 uppercase tracking-wider">Olympiad</span>
@@ -805,7 +669,6 @@
                         <button id="clear-charge-nodes" class="px-3 py-2 border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 transition-colors text-[8px] text-red-400 font-wide uppercase tracking-wider w-full sm:w-auto text-center">[ RESET GRID SCHEMATIC ]</button>
                     </div>
 
-                    <!-- Canvas — 4:3 on all sizes, taller on mobile -->
                     <div class="relative w-full aspect-[4/3] bg-[#020306] rounded-xl overflow-hidden border border-white/5">
                         <canvas id="field-simulation-canvas" class="w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute bottom-3 left-3 bg-[#040608]/90 px-3 py-1.5 rounded border border-white/10 pointer-events-none">
@@ -976,21 +839,6 @@
                 <a href="https://www.rokomari.com/book/225140/mojar-torit" target="_blank" class="px-5 py-2.5 bg-primaryCyan text-cosmicBg font-wide text-[9px] tracking-wider rounded uppercase font-bold hover:bg-white transition-colors text-center">Acquire Textbook</a>
                 <button onclick="closeBookModal()" class="px-5 py-2.5 border border-white/10 text-white font-wide text-[9px] tracking-wider rounded uppercase hover:border-white/30 transition-colors text-center">Terminate Scan</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Project Gallery Lightbox (single shared instance for every project card) -->
-    <div id="lightbox" role="dialog" aria-modal="true" aria-label="Project image gallery">
-        <div id="lightbox-stage">
-            <div id="lb-close">Close ✕</div>
-            <div id="lb-prev" class="lb-nav">‹</div>
-            <img id="lightbox-img" src="" alt="">
-            <div id="lb-next" class="lb-nav">›</div>
-            <div id="lightbox-meta">
-                <span id="lightbox-counter"></span>
-                <span id="lightbox-caption"></span>
-            </div>
-            <div id="lb-dots"></div>
         </div>
     </div>
 
@@ -1226,89 +1074,82 @@
         }
         window.addEventListener('keydown',e=>{if(e.key==='Escape')closeBookModal();});
 
-        // ============================================
-        // PROJECT GALLERY LIGHTBOX
-        // ============================================
-        (function initProjectLightbox() {
-            let currentImages = [];
-            let currentIndex = 0;
+        // ==========================================
+        // DYNAMIC MULTI-IMAGE CAROUSEL FRAME ENGINE
+        // ==========================================
+        document.querySelectorAll('[data-project-images]').forEach(container => {
+            const imagesStr = container.getAttribute('data-project-images');
+            if (!imagesStr) return;
+            
+            // Clean up paths and split into an array
+            const images = imagesStr.split(',').map(s => s.trim()).filter(Boolean);
+            if (images.length === 0) return;
 
-            const lightbox = document.getElementById('lightbox');
-            const imgEl = document.getElementById('lightbox-img');
-            const counterEl = document.getElementById('lightbox-counter');
-            const captionEl = document.getElementById('lightbox-caption');
-            const dotsEl = document.getElementById('lb-dots');
+            // Empty container to replace static fallbacks
+            container.innerHTML = '';
 
-            function render() {
-                const item = currentImages[currentIndex];
-                imgEl.src = item.src;
-                imgEl.alt = item.caption || '';
-                counterEl.textContent = `${currentIndex + 1} / ${currentImages.length}`;
-                captionEl.textContent = item.caption ? `— ${item.caption}` : '';
-                [...dotsEl.children].forEach((d, i) => d.classList.toggle('active', i === currentIndex));
-            }
+            // Monospace numeric telemetry display
+            const telemetryTracker = document.createElement('div');
+            telemetryTracker.className = 'absolute top-3 right-3 bg-cosmicBg/90 border border-white/10 px-2 py-0.5 rounded text-[8px] font-mono text-primaryCyan/85 z-30 pointer-events-none tracking-wider uppercase';
+            telemetryTracker.innerText = `1 / ${images.length}`;
+            container.appendChild(telemetryTracker);
 
-            function buildDots() {
-                dotsEl.innerHTML = '';
-                if (currentImages.length <= 1) return; // no dots needed for a single image
-                currentImages.forEach((_, i) => {
-                    const dot = document.createElement('div');
-                    dot.className = 'lb-dot';
-                    dot.addEventListener('click', (e) => { e.stopPropagation(); currentIndex = i; render(); });
-                    dotsEl.appendChild(dot);
-                });
-            }
+            // Construct stack layers
+            const imageLayers = [];
+            images.forEach((src, idx) => {
+                const layer = document.createElement('div');
+                layer.className = `absolute inset-0 transition-all duration-500 ease-out transform ${
+                    idx === 0 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0 pointer-events-none'
+                }`;
 
-            function openLightbox(images, startIndex) {
-                currentImages = images;
-                currentIndex = startIndex || 0;
-                buildDots();
-                render();
-                lightbox.classList.add('open');
-                document.body.style.overflow = 'hidden';
-                const hasMultiple = currentImages.length > 1;
-                document.getElementById('lb-prev').style.display = hasMultiple ? 'flex' : 'none';
-                document.getElementById('lb-next').style.display = hasMultiple ? 'flex' : 'none';
-            }
+                // Parse type (image path vs inline emoji/unicode character)
+                const isImagePath = src.startsWith('assets/') || src.includes('.') || src.startsWith('http');
+                if (isImagePath) {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = "Project Frame Asset";
+                    img.className = "w-full h-full object-contain object-center";
+                    layer.appendChild(img);
+                } else {
+                    const inlineNode = document.createElement('div');
+                    inlineNode.className = "w-full h-full flex items-center justify-center text-4xl opacity-50";
+                    inlineNode.innerText = src;
+                    layer.appendChild(inlineNode);
+                }
 
-            function closeLightbox() {
-                lightbox.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-
-            function nextImage() { currentIndex = (currentIndex + 1) % currentImages.length; render(); }
-            function prevImage() { currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length; render(); }
-
-            // Wire every project thumbnail carrying a data-gallery payload
-            document.querySelectorAll('[data-gallery]').forEach(el => {
-                el.addEventListener('click', () => {
-                    try {
-                        const images = JSON.parse(el.getAttribute('data-gallery'));
-                        if (images && images.length) openLightbox(images, 0);
-                    } catch (err) {
-                        console.error('Invalid gallery data on project card:', err);
-                    }
-                });
+                container.appendChild(layer);
+                imageLayers.push(layer);
             });
 
-            document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
-            document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); prevImage(); });
-            document.getElementById('lb-close').addEventListener('click', closeLightbox);
+            // Active Frame Index State
+            let activeIdx = 0;
 
-            // Clicking the main image itself also advances — "click through one after another"
-            imgEl.addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
+            // Tap/Click Listener mapping back to parent element
+            const parentCard = container.closest('.project-card');
+            if (parentCard) {
+                parentCard.addEventListener('click', (e) => {
+                    if (e.target.closest('a') || e.target.closest('button')) return; // Avoid breaking custom links
 
-            // Click outside the stage closes it
-            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+                    // Current slide out action
+                    imageLayers[activeIdx].classList.remove('opacity-100', 'scale-100', 'z-10');
+                    imageLayers[activeIdx].classList.add('opacity-0', 'scale-95', 'z-0', 'pointer-events-none');
 
-            // Keyboard: Esc closes, arrows navigate
-            document.addEventListener('keydown', (e) => {
-                if (!lightbox.classList.contains('open')) return;
-                if (e.key === 'Escape') closeLightbox();
-                if (e.key === 'ArrowRight') nextImage();
-                if (e.key === 'ArrowLeft') prevImage();
-            });
-        })();
+                    // Next slide active state calculation
+                    activeIdx = (activeIdx + 1) % imageLayers.length;
+
+                    // Next slide in action
+                    imageLayers[activeIdx].classList.remove('opacity-0', 'scale-95', 'z-0', 'pointer-events-none');
+                    imageLayers[activeIdx].classList.add('opacity-100', 'scale-100', 'z-10');
+
+                    // Update tracker panel
+                    telemetryTracker.innerText = `${activeIdx + 1} / ${imageLayers.length}`;
+
+                    // Tactile border pulse animation
+                    parentCard.classList.add('border-primaryCyan/40');
+                    setTimeout(() => parentCard.classList.remove('border-primaryCyan/40'), 300);
+                });
+            }
+        });
     </script>
 </body>
 </html>
